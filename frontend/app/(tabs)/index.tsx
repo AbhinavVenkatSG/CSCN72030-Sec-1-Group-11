@@ -1,3 +1,4 @@
+import Dosimeter from "@/components/Dosimeter/Dosimeter";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import HealthBar from "../../components/HealthMonitor/HealthMonitor";
@@ -20,7 +21,7 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.exteriorItem}>
-          {/* Placeholder for Radiation component */}
+          <Dosimeter value={67} />
         </View>
       </View>
     </View>
