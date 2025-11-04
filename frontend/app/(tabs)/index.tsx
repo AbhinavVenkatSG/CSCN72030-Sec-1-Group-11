@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import { HealthBar, STATIC_HEALTH } from "../../GUIDevices/HealthMonitor/HealthMonitor";
+import { HealthBar, STATIC_HEALTH } from "../../components/HealthMonitor/HealthMonitor";
 
 export default function HomeScreen() {
   return (
