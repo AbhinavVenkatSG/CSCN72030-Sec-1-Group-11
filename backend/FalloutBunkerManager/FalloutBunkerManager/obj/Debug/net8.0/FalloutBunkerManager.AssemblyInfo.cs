@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FalloutBunkerManager")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f24b8686952534cb4e380a74e97ddbd8c0c5fd42")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f0fd44a96337d4b03406981b0fd26842d1189395")]
 [assembly: System.Reflection.AssemblyProductAttribute("FalloutBunkerManager")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FalloutBunkerManager")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

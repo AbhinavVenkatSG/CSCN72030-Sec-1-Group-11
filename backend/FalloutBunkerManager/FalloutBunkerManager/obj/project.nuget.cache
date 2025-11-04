@@ -1,8 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "+DuncmplvQ0=",
+  "dgSpecHash": "Qo1uq3aXhDQ=",
   "success": true,
   "projectFilePath": "/Users/rami/Desktop/FALLOUT-BUNKER-MANAGER/backend/FalloutBunkerManager/FalloutBunkerManager/FalloutBunkerManager.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "/Users/rami/.nuget/packages/microsoft.netcore.app.ref/8.0.20/microsoft.netcore.app.ref.8.0.20.nupkg.sha512",
+    "/Users/rami/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.20/microsoft.aspnetcore.app.ref.8.0.20.nupkg.sha512",
+    "/Users/rami/.nuget/packages/microsoft.netcore.app.host.osx-arm64/8.0.20/microsoft.netcore.app.host.osx-arm64.8.0.20.nupkg.sha512"
+  ],
   "logs": []
 }
