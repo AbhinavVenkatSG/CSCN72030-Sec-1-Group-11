@@ -1,4 +1,4 @@
-// INSERT AUTHOR NAME HERE
+// Spencer Watkinson
 // Health Monitor Device, reads delta health values from a file
 
 class HealthMonitor : IDevice
@@ -6,7 +6,11 @@ class HealthMonitor : IDevice
     // Params
     public FileManager fileManager { get; }
     public DeviceType type { get { return DeviceType.HealthMonitor; } }
-    public string filePath { get; } = System.IO.Path.Combine("SensorEmulationFiles", "HealthLevels.dat");
+    public string filePath { get; } = Path.Combine("SensorEmulationFiles", "HealthLevels.dat");
+
+    private float currentHealth { get; set; } = 100.0f;
+    private const float MAX_HEALTH = 100f;
+    private const float MIN_HEALTH = 0f;
 
     // Constructor
     public HealthMonitor()
@@ -17,14 +21,19 @@ class HealthMonitor : IDevice
     // Methods
     public DeviceStatus QueryLatest()
     {
-        throw new NotImplementedException();
         float readInValue = fileManager.GetNextValue();
-        // Do device specific math, if required
-        // return new DeviceStatus
-        // { 
-        //     type = DeviceType.HealthMonitor,
-        //     currentValue = 0 // Replace with actual processed value
-        // };
+
+        currentHealth += readInValue;
+
+        // Ensures health stays within bounds
+        if (currentHealth > MAX_HEALTH) currentHealth = MAX_HEALTH;
+        if (currentHealth < MIN_HEALTH) currentHealth = MIN_HEALTH;
+
+        return new DeviceStatus
+        {
+            type = DeviceType.HealthMonitor,
+            currentValue = currentHealth
+        };
     }
 
     public void HandleCommand(DeviceCommand command)

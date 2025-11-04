@@ -56,3 +56,5 @@ backend/**/AppPackages/
 backend/**/BundleArtifacts/
 backend/**/artifacts/
 backend/FalloutBunkerManager/FalloutBunkerManager/obj/
+backend/FalloutBunkerManager/FalloutBunkerManager/obj/Debug/net8.0/FalloutBunkerManager.AssemblyInfo.cs
+backend/FalloutBunkerManager/FalloutBunkerManager/obj/Debug/net8.0/FalloutBunkerManager.AssemblyInfoInputs.cache
