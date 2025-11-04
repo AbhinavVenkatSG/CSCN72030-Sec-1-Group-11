@@ -41,3 +41,17 @@ app-example
 # generated native folders
 /ios
 /android
+
+# Backend (.NET)
+backend/**/*.suo
+backend/**/*.user
+backend/**/*.userosscache
+backend/**/*.sln.docstates
+backend/**/.vs/
+backend/**/bin/
+backend/**/obj/
+backend/**/TestResults/
+backend/**/Generated\ Files/
+backend/**/AppPackages/
+backend/**/BundleArtifacts/
+backend/**/artifacts/
