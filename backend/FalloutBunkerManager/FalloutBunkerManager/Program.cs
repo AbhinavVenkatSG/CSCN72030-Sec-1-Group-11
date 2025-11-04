@@ -1,15 +1,23 @@
-﻿using System;
-
-namespace FalloutBunkerManager
+﻿namespace FalloutBunkerManager
 {
-    class Program
+    internal class Program
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Fallout Bunker Manager is starting...");
-            // Additional startup logic here
+            IDevice[] devices = new IDevice[]
+            {
+                new Thermometer(),
+                new WaterSensor(),
+                new FoodSensor(),
+                new Generator(),
+                new O2Scrubber(),
+                new HealthMonitor(),
+                new Dosimeter()
+            };
+
+            var scadaController = new ScadaController(devices);
+
+            scadaController.MainLoop();
         }
     }
 }
-
-
