@@ -7,18 +7,10 @@ export default function HealthBar({ value, label = "Health" }: Props) {
   const anim = useRef(new Animated.Value(value)).current;
 
   useEffect(() => {
-    Animated.timing(anim, {
-      toValue: value,
-      duration: 300,
-      useNativeDriver: false,
-    }).start();
+    Animated.timing(anim, { toValue: value, duration: 300, useNativeDriver: false }).start();
   }, [value]);
 
-  const width = anim.interpolate({
-    inputRange: [0, 100],
-    outputRange: ["0%", "100%"],
-  });
-
+  const width = anim.interpolate({ inputRange: [0, 100], outputRange: ["0%", "100%"] });
   const color = anim.interpolate({
     inputRange: [0, 50, 100],
     outputRange: ["#e74c3c", "#f1c40f", "#2ecc71"], // red → yellow → green
