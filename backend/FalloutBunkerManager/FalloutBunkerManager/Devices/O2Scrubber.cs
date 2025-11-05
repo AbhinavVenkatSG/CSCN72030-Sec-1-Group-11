@@ -1,4 +1,4 @@
-// INSERT AUTHOR NAME HERE
+// Spencer Watkinson
 // Oxygen Scrubber Device, reads delta oxygen values from a file
 
 class O2Scrubber : IDevice
@@ -7,6 +7,10 @@ class O2Scrubber : IDevice
     public FileManager fileManager { get; }
     public DeviceType type { get { return DeviceType.O2Scrubber; } }
     public string filePath { get; } = System.IO.Path.Combine("SensorEmulationFiles", "OxygenLevels.dat");
+
+    private float curO2Level = 100f;
+    private const float MAX_O2_LEVEL = 100f;
+    private const float MIN_O2_LEVEL = 0f;
 
     // Constructor
     public O2Scrubber()
@@ -17,14 +21,19 @@ class O2Scrubber : IDevice
     // Methods
     public DeviceStatus QueryLatest()
     {
-        throw new NotImplementedException();
         float readInValue = fileManager.GetNextValue();
-        // Do device specific math, if required
-        // return new DeviceStatus
-        // { 
-        //     type = DeviceType.O2Scrubber,
-        //     currentValue = 0 // Replace with actual processed value
-        // };
+
+        curO2Level += readInValue;
+
+        // Ensures O2 level stays within bounds
+        if (curO2Level > MAX_O2_LEVEL) curO2Level = MAX_O2_LEVEL;
+        if (curO2Level < MIN_O2_LEVEL) curO2Level = MIN_O2_LEVEL;
+
+        return new DeviceStatus
+        { 
+            type = DeviceType.O2Scrubber,
+            currentValue = curO2Level
+        };
     }
 
     public void HandleCommand(DeviceCommand command)

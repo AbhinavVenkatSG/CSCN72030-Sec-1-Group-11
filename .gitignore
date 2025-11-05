@@ -56,9 +56,4 @@ backend/**/AppPackages/
 backend/**/BundleArtifacts/
 backend/**/artifacts/
 backend/FalloutBunkerManager/FalloutBunkerManager/obj/
-backend/FalloutBunkerManager/FalloutBunkerManager/obj/Debug/net8.0/FalloutBunkerManager.AssemblyInfo.cs
-backend/FalloutBunkerManager/FalloutBunkerManager/obj/Debug/net8.0/FalloutBunkerManager.AssemblyInfoInputs.cache
 package-lock.json
-backend/FalloutBunkerManager/FalloutBunkerManager/obj/Debug/net8.0/FalloutBunkerManager.AssemblyInfo.cs
-backend/FalloutBunkerManager/FalloutBunkerManager/obj/Debug/net8.0/FalloutBunkerManager.AssemblyInfoInputs.cache
-backend/FalloutBunkerManager/FalloutBunkerManager/obj/Debug/net8.0/FalloutBunkerManager.GeneratedMSBuildEditorConfig.editorconfig
