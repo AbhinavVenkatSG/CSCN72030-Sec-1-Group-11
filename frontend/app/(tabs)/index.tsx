@@ -1,35 +1,50 @@
-import { StyleSheet, Text, View } from "react-native";
+import Dosimeter from "@/components/Dosimeter/Dosimeter";
+import React from "react";
+import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import { LiveGeneratorComponent, STATIC_GENERATOR } from "../../components/Generator/LiveGenerator";
 import HealthBar from "../../components/HealthMonitor/HealthMonitor";
+import { OxygenScrubberComponent, STATIC_OXYGEN } from "../../components/OxygenScrubber/OxygenScrubber";
 import Thermometer from "../../components/Thermometer/Thermometer";
 
-// ⬇️ add these
-import { LiveGeneratorComponent, STATIC_GENERATOR } from "../../components/Generator/LiveGenerator";
-import { OxygenScrubberComponent, STATIC_OXYGEN } from "../../components/OxygenScrubber/OxygenScrubber";
+const BASE_WIDTH = 1024;
+const BASE_HEIGHT = 768;
 
 export default function HomeScreen() {
+  const { width, height } = useWindowDimensions();
+  const scale = Math.min(width / BASE_WIDTH, height / BASE_HEIGHT);
+
   return (
-    <View style={styles.container}>
-      {/* Centered health bar at top */}
-      <View style={styles.healthContainer}>
-        <HealthBar value={67} />
-      </View>
+    <View style={styles.viewport}>
+      <View style={[styles.scaleWrapper, { transform: [{ scale }] }]}>
+        <View style={styles.container}>
+          {/* Centered health bar at top */}
+          <View style={styles.healthContainer}>
+            <HealthBar value={67} />
+          </View>
 
-      {/* Left rail for compact vertical widgets */}
-      <View style={styles.leftRail}>
-        <LiveGeneratorComponent value={STATIC_GENERATOR} />
-        <OxygenScrubberComponent value={STATIC_OXYGEN} style={{ marginTop: 24 }} />
-      </View>
+          {/* Centered power & atmosphere controls */}
+          <View style={styles.resourceRow}>
+            <View style={styles.resourceModule}>
+              <LiveGeneratorComponent value={STATIC_GENERATOR} />
+            </View>
 
-      {/* Right-side "Exterior Values" box */}
-      <View style={styles.exteriorBox}>
-        <Text style={styles.exteriorTitle}>Exterior Values</Text>
+            <View style={styles.resourceModule}>
+              <OxygenScrubberComponent value={STATIC_OXYGEN} />
+            </View>
+          </View>
 
-        <View style={styles.exteriorItem}>
-          <Thermometer value={67} />
-        </View>
+          {/* Right-side "Exterior Values" box */}
+          <View style={styles.exteriorBox}>
+            <Text style={styles.exteriorTitle}>Exterior Values</Text>
 
-        <View style={styles.exteriorItem}>
-          {/* Placeholder for Radiation component */}
+            <View style={styles.exteriorItem}>
+              <Thermometer value={67} />
+            </View>
+
+            <View style={styles.exteriorItem}>
+              <Dosimeter value={67} />
+            </View>
+          </View>
         </View>
       </View>
     </View>
@@ -37,10 +52,21 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  viewport: {
     flex: 1,
     backgroundColor: "#212121ff",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  scaleWrapper: {
+    width: BASE_WIDTH,
+    height: BASE_HEIGHT,
+    alignItems: "stretch",
+  },
+  container: {
+    flex: 1,
     padding: 16,
+    backgroundColor: "#212121ff",
   },
   healthContainer: {
     marginTop: 12,
@@ -51,19 +77,20 @@ const styles = StyleSheet.create({
   healthTitle: {
     color: "#fff",
     fontWeight: "700",
-    fontSize: 18,                 // a bit bigger; try 20 if you want more presence
+    fontSize: 20,                
     textAlign: "center",
-    textShadowColor: "rgba(255,255,255,0.9)", // glow
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 6,
   },
-
-  // ⬇️ fixed-width left column so vertical bars align perfectly
-  leftRail: {
-    width: 72,            // must match COLUMN_WIDTH in your components
-    alignItems: "center", // center bars within the rail
-    gap: 24,
-    marginTop: 16,
+  resourceRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 40,
+    marginTop: 120,
+    alignSelf: "flex-end",
+    marginRight: 250,
+  },
+  resourceModule: {
+    alignItems: "center"
   },
 
   exteriorBox: {

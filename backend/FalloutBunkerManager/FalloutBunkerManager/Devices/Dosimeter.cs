@@ -1,4 +1,4 @@
-// INSERT AUTHOR NAME HERE
+// Ricardo & Spencer
 // Dosimeter Device, reads static radiation values from a file
 
 class Dosimeter : IDevice
@@ -6,7 +6,7 @@ class Dosimeter : IDevice
     // Params
     public FileManager fileManager { get; }
     public DeviceType type { get { return DeviceType.Dosimeter; } }
-    public string filePath { get; } = System.IO.Path.Combine("SensorEmulationFiles", "RadiationLevels.dat");
+    public string filePath { get; } = Path.Combine("SensorEmulationFiles", "RadiationLevels.dat");
 
     // Constructor
     public Dosimeter()
@@ -17,14 +17,13 @@ class Dosimeter : IDevice
     // Methods
     public DeviceStatus QueryLatest()
     {
-        throw new NotImplementedException();
         float readInValue = fileManager.GetNextValue();
-        // Do device specific math, if required
-        // return new DeviceStatus
-        // { 
-        //     type = DeviceType.Dosimeter,
-        //     currentValue = 0 // Replace with actual processed value
-        // };
+
+        return new DeviceStatus
+        { 
+            type = DeviceType.Dosimeter,
+            currentValue = readInValue
+        };
     }
 
     public void HandleCommand(DeviceCommand command)

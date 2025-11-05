@@ -12,15 +12,15 @@ type Props = {
   showValue?: boolean;            // show numeric value
 };
 
-const TRACK_HEIGHT = 120;
-const TRACK_WIDTH  = 50;
+const TRACK_HEIGHT = 200;
+const TRACK_WIDTH  = 150;
 
 export default function LiveGeneratorComponent({
   value,
   label = "Generator",
   style,
   labelPosition = "below",
-  labelOffset = 4,
+  labelOffset = -30,
   showValue = true,
 }: Props) {
   const safe = Math.max(0, Math.min(100, value));
@@ -96,30 +96,24 @@ const styles = StyleSheet.create({
   wrap: {
     height: TRACK_HEIGHT,
     width: TRACK_WIDTH,
-    backgroundColor: "#222",
+    backgroundColor: "#333",
     borderRadius: 10,
     overflow: "hidden",
     flexDirection: "column-reverse",
   },
   fill: { width: "100%" },
   value: {
-    color: "#fff",
+    color: "#222",
     fontSize: 15,
     fontWeight: "800",
     lineHeight: 14,
     textAlign: "center",
-    textShadowColor: "rgba(255,255,255,0.95)",
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 8,
   },
   label: {
-    color: "#fff",
+    color: "#222",
     fontWeight: "700",
     fontSize: 14,
     lineHeight: 16,
     textAlign: "center",
-    textShadowColor: "rgba(255,255,255,0.9)",
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 6,
   },
 });

@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     textShadowRadius: 6,
   },
   track: {
-    backgroundColor: "#222",
+    backgroundColor: "#333",
     overflow: "hidden",
     justifyContent: "center",
   },
