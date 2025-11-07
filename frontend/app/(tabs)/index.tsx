@@ -1,11 +1,13 @@
 import Dosimeter from "@/components/Dosimeter/Dosimeter";
 import React from "react";
 import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import FoodMonitor from "../../components/FoodMonitor/FoodMonitor";
 import Generator from "../../components/Generator/Generator";
 import HealthMonitor from "../../components/HealthMonitor/HealthMonitor";
 import OxygenScrubber from "../../components/OxygenScrubber/OxygenScrubber";
 import Thermometer from "../../components/Thermometer/Thermometer";
 import WaterSensor from "../../components/WaterSensor/WaterSensor";
+
 
 const BASE_WIDTH = 1024;
 const BASE_HEIGHT = 768;
@@ -31,13 +33,17 @@ export default function HomeScreen() {
             </View>
 
             <View style={styles.resourceModule}>
-              <Generator value={21} />
+                <FoodMonitor value={67} />
+            </View>
+            <View style={styles.resourceModule}>
+                <Generator value={21} />
             </View>
 
             <View style={styles.resourceModule}>
-              <OxygenScrubber value={88} />
+                <OxygenScrubber value={88} />
             </View>
 
+            
           </View>
 
           {/* Right-side "Exterior Values" box */}
