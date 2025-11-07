@@ -1,4 +1,4 @@
-// INSERT AUTHOR NAME HERE
+// Devki Nandan Sharma
 // Food Sensor Device, reads delta food values from a file
 
 class FoodSensor : IDevice
@@ -6,7 +6,10 @@ class FoodSensor : IDevice
     // Params
     public FileManager fileManager { get; }
     public DeviceType type { get { return DeviceType.FoodSensor; } }
-    public string filePath { get; } = System.IO.Path.Combine("SensorEmulationFiles", "FoodLevels.dat");
+    public string filePath { get; } = Path.Combine("SensorEmulationFiles", "FoodLevels.dat");
+    private float currentFoodLevel { get; set; } = 100.0f;
+    private float Max_Food = 100f;
+    private float Min_Food = 0f;
 
     // Constructor
     public FoodSensor()
@@ -17,13 +20,17 @@ class FoodSensor : IDevice
     // Methods
     public DeviceStatus QueryLatest()
     {
-        throw new NotImplementedException();
         float readInValue = fileManager.GetNextValue();
-        // Do device specific math, if required
+
+        currentFoodLevel += readInValue;
+
+        if (currentFoodLevel > Max_Food) currentFoodLevel = Max_food;
+        if (cureentFoodLevel < Min_Food) currentFoodLevel = Min_food;
+
         return new DeviceStatus
         {
             type = DeviceType.FoodSensor,
-            currentValue = 0 // Replace with actual processed value
+            currentValue = currentFoodLevel
         };
     }
 
