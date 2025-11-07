@@ -6,6 +6,7 @@ import Generator from "../../components/Generator/Generator";
 import HealthMonitor from "../../components/HealthMonitor/HealthMonitor";
 import OxygenScrubber from "../../components/OxygenScrubber/OxygenScrubber";
 import Thermometer from "../../components/Thermometer/Thermometer";
+import FoodMonitor from "../../components/FoodMonitor/FoodMonitor";
 import WaterSensor from "../../components/WaterSensor/WaterSensor";
 
 
@@ -29,6 +30,11 @@ export default function HomeScreen() {
           <View style={styles.resourceRow}>
 
             <View style={styles.resourceModule}>
+                <FoodMonitor value={67} />
+            </View>
+
+            <View style={styles.resourceModule}>
+                <Generator value={21} />
               <WaterSensor value={60} />
             </View>
 
