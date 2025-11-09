@@ -9,10 +9,12 @@ namespace FalloutBunkerApi.Controllers
     [Route("api/[controller]")]
     public class DeviceController : ControllerBase
     {
-        private readonly IDevice[] devices;
-        private readonly int[] queryCounters;
+        // Static so devices persist across requests
+        private static readonly IDevice[] devices;
+        private static readonly int[] queryCounters;
 
-        public DeviceController()
+        // Static constructor runs only once per app lifetime
+        static DeviceController()
         {
             string sensorFolder = Path.GetFullPath(Path.Combine(
                 AppDomain.CurrentDomain.BaseDirectory,
@@ -33,20 +35,19 @@ namespace FalloutBunkerApi.Controllers
 
             queryCounters = new int[devices.Length];
         }
-        //okay rn my understanding is that it is just  this query latest function is not not querying the latest data from the devices
-        //its just querying the fist line of data from the file each time 
-        //
+
+        // GET api/device
         [HttpGet]
         public ActionResult<DeviceStatus[]> GetAll()
         {
             var statuses = new DeviceStatus[devices.Length];
+            Console.WriteLine($"\n==Device Update: {DateTime.Now} ==");
 
             for (int i = 0; i < devices.Length; i++)
             {
                 statuses[i] = devices[i].QueryLatest();
                 queryCounters[i]++;
-
-                
+                Console.WriteLine($"[{devices[i].type}] -> Current Value: {statuses[i].currentValue}");
             }
 
             return Ok(statuses);

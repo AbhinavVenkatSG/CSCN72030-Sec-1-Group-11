@@ -1,7 +1,6 @@
 
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View, useWindowDimensions, ActivityIndicator } from "react-native";
-//import for the loading screen
+import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import Dosimeter from "../../components/Dosimeter/Dosimeter";
 import Generator from "../../components/Generator/Generator";
 import HealthMonitor from "../../components/HealthMonitor/HealthMonitor";
@@ -14,14 +13,21 @@ const API_URL = "http://localhost:5244/api/device";
 const BASE_WIDTH = 1024;
 const BASE_HEIGHT = 768;
 
+// Mirror the backend DeviceType enum
+enum DeviceType {
+  Thermometer = 0,
+  WaterSensor = 1,
+  FoodSensor = 2,
+  Generator = 3,
+  O2Scrubber = 4,
+  HealthMonitor = 5,
+  Dosimeter = 6,
+}
+
 interface Device {
   type: number;
   currentValue: number;
 }
-
-//polling function that polls the api
-// okay here the plan was to call the api every 3 seconds or so and see if the website is updating properly
-// the issue is it is doing but the values are not changing so for now im commiting this but i have to look into that later 
 
 export default function HomeScreen() {
   const { width, height } = useWindowDimensions();
@@ -30,42 +36,36 @@ export default function HomeScreen() {
   const [devices, setDevices] = useState<Device[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Helper to get device value by type
-  const getValue = (typeIndex: number) => {
-    const device = devices.find(d => d.type === typeIndex);
+  // Helper to get device value by enum
+  const getValue = (type: DeviceType) => {
+    const device = devices.find(d => d.type === type);
     return device?.currentValue ?? 0;
   };
 
-  // Fetch devices from backend every second
-  
-// Fetch devices from backend every 3 seconds
-useEffect(() => {
-  let isFetching = false;
+  useEffect(() => {
+    let isFetching = false;
 
-  const fetchDevices = async () => {
-    if (isFetching) return; 
-    isFetching = true;
-    try {
-      const res = await fetch(API_URL);
-      const data: Device[] = await res.json();
-      setDevices(data);
-      setLoading(false);
-    } catch (err) {
-      console.error("Error fetching device data:", err);
-    } finally {
-      isFetching = false;
-    }
-  };
+    const fetchDevices = async () => {
+      if (isFetching) return;
+      isFetching = true;
 
-  // initial fetch
-  fetchDevices();
+      try {
+        const res = await fetch(API_URL);
+        const data: Device[] = await res.json();
+        setDevices(data);
+        setLoading(false);
+      } catch (err) {
+        console.error("Error fetching device data:", err);
+      } finally {
+        isFetching = false;
+      }
+    };
 
-  // poll every 3 seconds
-  const interval = setInterval(fetchDevices, 3000);
+    fetchDevices(); // initial fetch
+    const interval = setInterval(fetchDevices, 3000); // poll every 3 seconds
 
-  // cleanup
-  return () => clearInterval(interval);
-}, []);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <View style={styles.viewport}>
@@ -73,19 +73,19 @@ useEffect(() => {
         <View style={styles.container}>
           {/* Centered health bar at top */}
           <View style={styles.healthContainer}>
-            <HealthMonitor value={getValue(0)} />
+            <HealthMonitor value={getValue(DeviceType.HealthMonitor)} />
           </View>
 
           {/* Centered power & atmosphere controls */}
           <View style={styles.resourceRow}>
             <View style={styles.resourceModule}>
-              <WaterSensor value={getValue(1)} />
+              <WaterSensor value={getValue(DeviceType.WaterSensor)} />
             </View>
             <View style={styles.resourceModule}>
-              <Generator value={getValue(2)} />
+              <Generator value={getValue(DeviceType.Generator)} />
             </View>
             <View style={styles.resourceModule}>
-              <OxygenScrubber value={getValue(3)} />
+              <OxygenScrubber value={getValue(DeviceType.O2Scrubber)} />
             </View>
           </View>
 
@@ -93,10 +93,10 @@ useEffect(() => {
           <View style={styles.exteriorBox}>
             <Text style={styles.exteriorTitle}>Exterior Values</Text>
             <View style={styles.exteriorItem}>
-              <Thermometer value={getValue(4)} />
+              <Thermometer value={getValue(DeviceType.Thermometer)} />
             </View>
             <View style={styles.exteriorItem}>
-              <Dosimeter value={getValue(5)} />
+              <Dosimeter value={getValue(DeviceType.Dosimeter)} />
             </View>
           </View>
         </View>
