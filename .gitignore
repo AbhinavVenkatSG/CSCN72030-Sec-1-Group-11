@@ -57,3 +57,4 @@ backend/**/BundleArtifacts/
 backend/**/artifacts/
 backend/FalloutBunkerManager/FalloutBunkerManager/obj/
 package-lock.json
+/.vs
