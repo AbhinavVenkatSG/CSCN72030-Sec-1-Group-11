@@ -1,15 +1,14 @@
-
-
+import LightSwitch from "@/components/LightSwitch/LightSwitch";
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import Dosimeter from "../../components/Dosimeter/Dosimeter";
+import FoodMonitor from "../../components/FoodMonitor/FoodMonitor";
+import { useFoodMonitor } from "../../components/FoodMonitor/useFoodMonitor";
 import Generator from "../../components/Generator/Generator";
 import HealthMonitor from "../../components/HealthMonitor/HealthMonitor";
 import OxygenScrubber from "../../components/OxygenScrubber/OxygenScrubber";
 import Thermometer from "../../components/Thermometer/Thermometer";
-import FoodMonitor from "../../components/FoodMonitor/FoodMonitor";
 import WaterSensor from "../../components/WaterSensor/WaterSensor";
-import { useFoodMonitor } from "../../components/FoodMonitor/useFoodMonitor";
 
 // API config
 const API_URL = "http://localhost:5244/api/device";
@@ -38,6 +37,9 @@ export default function HomeScreen() {
 
   const [devices, setDevices] = useState<Device[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // state for the LightSwitch percentage
+  const [powerPercent, setPowerPercent] = useState(50);
 
   // Helper to get device value by enum
   const getValue = (type: DeviceType) => {
@@ -71,6 +73,23 @@ export default function HomeScreen() {
     return () => clearInterval(interval);
   }, []);
 
+  // called when user taps the LightSwitch box
+  const handleApplyGeneratorPower = async () => {
+    try {
+      await fetch(`${API_URL}/generator-power`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          percentage: powerPercent,
+        }),
+      });
+    } catch (err) {
+      console.error("Error updating generator power:", err);
+    }
+  };
+
   return (
     <View style={styles.viewport}>
       <View style={[styles.scaleWrapper, { transform: [{ scale }] }]}>
@@ -85,12 +104,23 @@ export default function HomeScreen() {
             <View style={styles.resourceModule} data-testid="water-value">
               <WaterSensor value={getValue(DeviceType.WaterSensor)} />
             </View>
+
             <View style={styles.resourceModule} data-testid="generator-value">
               <Generator value={getValue(DeviceType.Generator)} />
             </View>
+
+            <View style={styles.resourceModule}>
+              <LightSwitch
+                value={powerPercent}
+                onChange={setPowerPercent}
+                onApply={handleApplyGeneratorPower}
+              />
+            </View>
+
             <View style={styles.resourceModule} data-testid="o2scrubber-value">
               <OxygenScrubber value={getValue(DeviceType.O2Scrubber)} />
             </View>
+
             <View style={styles.resourceModule} data-testid="food-value">
               <FoodMonitor value={foodValue} />
             </View>
@@ -135,21 +165,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 6,
   },
-  resourceRow: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 40,
-    marginTop: 120,
-    alignSelf: "flex-end",
-    marginRight: 250,
+  resourceRow: { 
+    flexDirection: "row", 
+    justifyContent: "center", 
+    alignItems: "center", 
+    gap: 50, 
+    marginTop: 120, 
+    alignSelf: "center", 
   },
+
   resourceModule: {
     alignItems: "center",
   },
   exteriorBox: {
     position: "absolute",
-    right: 16,
+    right: -125,
     top: "25%",
     borderWidth: 2,
     borderColor: "#fff",
