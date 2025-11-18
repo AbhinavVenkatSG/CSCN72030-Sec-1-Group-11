@@ -60,7 +60,6 @@ export default function HomeScreen() {
 
   const getValue = (type: DeviceType) => {
     const device = devices.find((d) => d.type === type);
-    return device?.currentValue ?? 10; // default 50 if missing
   };
 
   const foodValue = useFoodMonitor(getValue(DeviceType.FoodSensor));
