@@ -1,0 +1,64 @@
+
+name: Sprint 1 Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  level1-mstest:
+    name: Level 1 - MSTest Unit Tests
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Restore .NET dependencies
+        run: dotnet restore ./Tests/Backend/IDeviceTests/DeviceFileReadTests.csproj
+
+      - name: Build backend
+        run: dotnet build ./Tests/Backend/IDeviceTests/DeviceFileReadTests.csproj --configuration Release
+
+      - name: Run MSTest Unit Tests
+        run: dotnet test ./Tests/Backend/IDeviceTests/DeviceFileReadTests.csproj --configuration Release --no-build --verbosity normal
+
+  level2-node:
+    name: Level 2 - Device API / File Read Test
+    runs-on: windows-latest
+    needs: level1-mstest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+
+      - name: Install dependencies (if any)
+        run: npm install
+        working-directory: ./Tests/Backend
+
+      - name: Run Level 2 Test
+        run: node poll-devices.mjs
+        working-directory: ./Tests/Backend
+
+  level3-playwright:
+    name: Level 3 - Playwright UI Tests (placeholder)
+    runs-on: windows-latest
+    needs: level2-node
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Placeholder
+        run: echo "Playwright tests will be added in Sprint 2"
