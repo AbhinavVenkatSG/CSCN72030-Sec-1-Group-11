@@ -1,8 +1,8 @@
 
-namespace FalloutBunkerManager.Devices{
+namespace FalloutBunkerManager.Devices;
+
 public class DeviceStatus
 {
     public DeviceType type { get; set; }
     public float currentValue { get; set; }
-}
 }

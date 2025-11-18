@@ -1,4 +1,3 @@
-
 using Microsoft.AspNetCore.Mvc;
 using FalloutBunkerManager;
 using FalloutBunkerManager.Devices;
@@ -13,24 +12,18 @@ namespace FalloutBunkerApi.Controllers
         private static readonly IDevice[] devices;
         private static readonly int[] queryCounters;
 
-    
         static DeviceController()
         {
-            string sensorFolder = Path.GetFullPath(Path.Combine(
-                AppDomain.CurrentDomain.BaseDirectory,
-                "..", "..", "..", "..",
-                "FalloutBunkerManager", "FalloutBunkerManager", "SensorEmulationFiles"
-            ));
 
             devices = new IDevice[]
             {
-                new Thermometer(sensorFolder),
-                new WaterSensor(sensorFolder),
-                new FoodSensor(sensorFolder),
-                new Generator(sensorFolder),
-                new O2Scrubber(sensorFolder),
-                new HealthMonitor(sensorFolder),
-                new Dosimeter(sensorFolder)
+                new Thermometer(),
+                new WaterSensor(),
+                new FoodSensor(),
+                new Generator(),
+                new O2Scrubber(),
+                new HealthMonitor(),
+                new Dosimeter()
             };
 
             queryCounters = new int[devices.Length];

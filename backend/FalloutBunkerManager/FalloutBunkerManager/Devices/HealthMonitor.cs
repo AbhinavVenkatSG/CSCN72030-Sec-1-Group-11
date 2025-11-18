@@ -1,21 +1,24 @@
 // Spencer Watkinson
 // Health Monitor Device, reads delta health values from a file
-namespace FalloutBunkerManager.Devices {
+
+namespace FalloutBunkerManager.Devices;
+
 public class HealthMonitor : IDevice
 {
     // Params
     public FileManager fileManager { get; }
     public DeviceType type { get { return DeviceType.HealthMonitor; } }
-    public string filePath { get; } 
+    public string filePath { get; } = Path.Combine("SensorEmulationFiles", "HealthLevels.dat");
+    private BunkerStatuses bunkerStatuses;
 
     private float currentHealth { get; set; } = 100.0f;
     private const float MAX_HEALTH = 100f;
     private const float MIN_HEALTH = 0f;
 
     // Constructor
-    public HealthMonitor(string baseFolder)
+    public HealthMonitor(BunkerStatuses bunkerStatuses)
     {
-        filePath = Path.Combine(baseFolder, "HealthLevels.dat");
+        this.bunkerStatuses = bunkerStatuses;
         fileManager = new FileManager(filePath);
     }
 
@@ -23,6 +26,11 @@ public class HealthMonitor : IDevice
     public DeviceStatus QueryLatest()
     {
         float readInValue = fileManager.GetNextValue();
+
+        if (bunkerStatuses.LightsOn == false)
+        {
+            readInValue *= 2;
+        }
 
         currentHealth += readInValue;
 
@@ -36,11 +44,4 @@ public class HealthMonitor : IDevice
             currentValue = currentHealth
         };
     }
-
-    public void HandleCommand(DeviceCommand command)
-    {
-        throw new NotImplementedException();
-        // Im not sure yet, sprint 2 issue :P
-    }
-}
 }

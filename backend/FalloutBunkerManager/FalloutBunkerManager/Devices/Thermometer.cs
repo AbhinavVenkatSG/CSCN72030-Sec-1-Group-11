@@ -1,17 +1,20 @@
 // Spencer Watkinson
 // Thermometer Device, reads static temperature values from a file
-namespace FalloutBunkerManager.Devices{
+
+namespace FalloutBunkerManager.Devices;
+
 public class Thermometer : IDevice
 {
     // Params
     public FileManager fileManager { get; }
     public DeviceType type { get { return DeviceType.Thermometer; } }
-    public string filePath { get; }
+    public string filePath { get; } = Path.Combine("SensorEmulationFiles", "Temperature.dat");
+    private BunkerStatuses bunkerStatuses;
 
     // Constructor
-    public Thermometer(string baseFolder)
+    public Thermometer(BunkerStatuses bunkerStatuses)
     {
-        filePath =Path.Combine(baseFolder,"Temperature.dat");
+        this.bunkerStatuses = bunkerStatuses;
         fileManager = new FileManager(filePath);
     }
 
@@ -20,17 +23,12 @@ public class Thermometer : IDevice
     {
         float readInValue = fileManager.GetNextValue();
 
+        // do math
+
         return new DeviceStatus
         {
             type = DeviceType.Thermometer,
             currentValue = readInValue
         };
     }
-
-    public void HandleCommand(DeviceCommand command)
-    {
-        throw new NotImplementedException();
-        // Im not sure yet, sprint 2 issue :P
-    }
-}
 }
