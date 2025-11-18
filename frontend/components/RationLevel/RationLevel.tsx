@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#3a3a3a",
   },
   rationButtonSelected: {
-    backgroundColor: "#ff9ea8",
+    backgroundColor: "#4CAF50",
   },
   rationButtonText: {
     color: "#fff",

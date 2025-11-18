@@ -11,6 +11,8 @@ import { useFoodMonitor } from "../../components/FoodMonitor/useFoodMonitor";
 import Generator from "../../components/Generator/Generator";
 import HealthMonitor from "../../components/HealthMonitor/HealthMonitor";
 import OxygenScrubber from "../../components/OxygenScrubber/OxygenScrubber";
+import OxygenScrubberThreshold from "../../components/OxygenScrubber/OxygenScrubberThreshold";
+import ScavengeToggle from "../../components/Scavenge/Scavenge"; // adjust path if needed
 import Thermometer from "../../components/Thermometer/Thermometer";
 import WaterSensor from "../../components/WaterSensor/WaterSensor";
 
@@ -42,14 +44,12 @@ export default function HomeScreen() {
   const [devices, setDevices] = useState<Device[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Light switch percentage
   const [powerPercent, setPowerPercent] = useState(50);
-
-  // Ration level
   const [rationLevel, setRationLevel] =
     useState<RationLevelValue>("medium");
+  const [o2Threshold, setO2Threshold] = useState(80);
+  const [scavengeAtNight, setScavengeAtNight] = useState(false);
 
-  // Helper to get device value by enum
   const getValue = (type: DeviceType) => {
     const device = devices.find((d) => d.type === type);
     return device?.currentValue ?? 0;
@@ -76,49 +76,51 @@ export default function HomeScreen() {
       }
     };
 
-    fetchDevices(); // initial fetch
-    const interval = setInterval(fetchDevices, 3000); // poll every 3 seconds
+    fetchDevices();
+    const interval = setInterval(fetchDevices, 3000);
     return () => clearInterval(interval);
   }, []);
 
-  // called when user taps the LightSwitch box
   const handleApplyGeneratorPower = async () => {
     try {
       await fetch(`${API_URL}/generator-power`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          percentage: powerPercent,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ percentage: powerPercent }),
       });
     } catch (err) {
       console.error("Error updating generator power:", err);
     }
   };
 
-  // Next Day button handler
+  const handleApplyOxygenScrubberThreshold = async () => {
+    console.log("Apply O₂ scrubber threshold:", o2Threshold);
+    // await fetch(`${API_URL}/o2scrubber-threshold`, { ... });
+  };
+
   const handleNextDay = async () => {
-    console.log("Next Day triggered");
-    // TODO: call your backend endpoint when it's ready
-    // await fetch(`${API_URL}/next-day`, { method: "POST" });
+    console.log("Next Day triggered", {
+      powerPercent,
+      rationLevel,
+      o2Threshold,
+      scavengeAtNight,
+    });
+    // await fetch(`${API_URL}/next-day`, { ... });
   };
 
   return (
     <View style={styles.viewport}>
       <View style={[styles.scaleWrapper, { transform: [{ scale }] }]}>
         <View style={styles.container}>
-          {/* TOP / MIDDLE: health + resource modules + exterior box */}
+          {/* FULL-WIDTH HEALTH BAR ACROSS CANVAS */}
+          <View style={styles.healthContainer} data-testid="health-value">
+            <HealthMonitor value={getValue(DeviceType.HealthMonitorType)} />
+          </View>
+
+          {/* TOP / MIDDLE: resource modules + exterior box */}
           <View style={styles.mainRow}>
             {/* LEFT COLUMN */}
             <View style={styles.leftColumn}>
-              {/* Health Monitor at top */}
-              <View style={styles.healthContainer} data-testid="health-value">
-                <HealthMonitor value={getValue(DeviceType.HealthMonitorType)} />
-              </View>
-
-              {/* Resource row */}
               <View style={styles.resourceRow}>
                 {/* LEFT: Food + Water */}
                 <View style={styles.resourceModule} data-testid="food-value">
@@ -138,7 +140,7 @@ export default function HomeScreen() {
                   />
                 </View>
 
-                {/* RIGHT: Generator + O2 Scrubber */}
+                {/* RIGHT: Generator + O₂ Scrubber + Threshold */}
                 <View
                   style={styles.resourceModule}
                   data-testid="generator-value"
@@ -151,6 +153,11 @@ export default function HomeScreen() {
                   data-testid="o2scrubber-value"
                 >
                   <OxygenScrubber value={getValue(DeviceType.O2Scrubber)} />
+                  <OxygenScrubberThreshold
+                    value={o2Threshold}
+                    onChange={setO2Threshold}
+                    onApply={handleApplyOxygenScrubberThreshold}
+                  />
                 </View>
               </View>
             </View>
@@ -167,10 +174,17 @@ export default function HomeScreen() {
             </View>
           </View>
 
-          {/* BOTTOM BAR — Ration Level (left) + Next Day (right) */}
+          {/* BOTTOM BAR — Ration Level (left) + Scavenge / Next Day (right) */}
           <View style={styles.bottomRow}>
             <RationLevel value={rationLevel} onChange={setRationLevel} />
-            <NextDay onPress={handleNextDay} />
+
+            <View style={styles.bottomRightColumn}>
+              <ScavengeToggle
+                value={scavengeAtNight}
+                onChange={setScavengeAtNight}
+              />
+              <NextDay onPress={handleNextDay} />
+            </View>
           </View>
         </View>
       </View>
@@ -189,39 +203,40 @@ const styles = StyleSheet.create({
     width: BASE_WIDTH,
     height: BASE_HEIGHT,
     alignItems: "stretch",
-    marginLeft: 100,
+    marginLeft: 80,
   },
   container: {
     flex: 1,
     padding: 16,
     backgroundColor: "#212121ff",
-    justifyContent: "space-between", // mainRow top-ish, bottomRow bottom
+    justifyContent: "space-between",
   },
 
-  // wraps left column + exterior box
+  healthContainer: {
+    width: "100%",
+    alignSelf: "stretch",
+    alignItems: "center",
+    marginTop: 8,
+    marginBottom: 16,
+  },
+
   mainRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    flex: 1,
   },
 
-  // left side content (health + resource row)
   leftColumn: {
     flex: 1,
   },
 
-  healthContainer: {
-    marginTop: 12,
-    alignSelf: "stretch",
-    alignItems: "center",
-    gap: 6,
-  },
   resourceRow: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
     gap: 40,
-    marginTop: 120,
+    marginTop: 5,
   },
   resourceModule: {
     alignItems: "center",
@@ -234,7 +249,7 @@ const styles = StyleSheet.create({
     padding: 12,
     alignItems: "center",
     marginLeft: 100,
-    marginTop: 150,
+    marginTop: 20,
   },
   exteriorTitle: {
     color: "#fff",
@@ -247,11 +262,15 @@ const styles = StyleSheet.create({
     marginVertical: 8,
   },
 
-  // bottom bar (Ration left, Next Day right)
   bottomRow: {
     width: "100%",
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-end",
+    marginTop: 16,
+  },
+  bottomRightColumn: {
+    alignItems: "flex-end",
+    gap: 8,
   },
 });
