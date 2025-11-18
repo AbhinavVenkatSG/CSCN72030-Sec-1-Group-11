@@ -2,18 +2,19 @@ import React from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
 export type LightSwitchProps = {
-  value: number;                 // 0–100
+  value: number; // 0–100
   onChange: (newValue: number) => void;
-  onApply?: () => void;          // called when user taps the control
+  onApply?: () => void; // called when user finishes editing (blur or tap)
 };
 
-export default function LightSwitch({ value, onChange, onApply }: LightSwitchProps) {
+export default function LightSwitch({
+  value,
+  onChange,
+  onApply,
+}: LightSwitchProps) {
   const handleChangeText = (text: string) => {
-    // keep only digits
     const cleaned = text.replace(/[^0-9]/g, "");
     const numericValue = cleaned === "" ? 0 : parseInt(cleaned, 10);
-
-    // clamp 0–100
     const clamped = Math.max(0, Math.min(100, numericValue));
     onChange(clamped);
   };
@@ -22,8 +23,8 @@ export default function LightSwitch({ value, onChange, onApply }: LightSwitchPro
     <View style={styles.container}>
       <Text style={styles.label}>Generator Power</Text>
 
-      {/* tap anywhere on the box to apply the setting */}
-      <Pressable onPress={onApply}>
+      {/* tap anywhere on the box OR blur input to apply */}
+      <Pressable>
         <View style={styles.box}>
           <Text style={styles.symbol}>💡</Text>
 
@@ -32,7 +33,8 @@ export default function LightSwitch({ value, onChange, onApply }: LightSwitchPro
             keyboardType="numeric"
             value={String(value)}
             onChangeText={handleChangeText}
-            maxLength={3} // 0–100
+            onBlur={onApply}
+            maxLength={3}
           />
 
           <Text style={styles.percentSymbol}>%</Text>
@@ -56,14 +58,14 @@ const styles = StyleSheet.create({
   },
   symbol: {
     color: "#fff",
-    fontSize: 32, // bigger bulb
+    fontSize: 32,
     marginRight: 6,
   },
   input: {
     color: "#fff",
-    fontSize: 26,  // bigger text
+    fontSize: 26,
     fontWeight: "bold",
-    width: 48,     // compact textbox
+    width: 48,
     textAlign: "center",
     paddingVertical: 0,
     paddingHorizontal: 0,
