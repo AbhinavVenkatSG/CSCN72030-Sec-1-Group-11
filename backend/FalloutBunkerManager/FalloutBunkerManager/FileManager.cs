@@ -9,8 +9,19 @@ public class FileManager
 
     public FileManager(string path)
     {
-        filePath = path;
-        fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+        if (!Path.IsPathRooted(path))
+        {
+            path = Path.Combine(AppContext.BaseDirectory, path);
+        }
+
+        filePath = Path.GetFullPath(path);
+
+        if (!File.Exists(filePath))
+        {
+            throw new FileNotFoundException($"Device data file not found: {filePath}");
+        }
+
+        fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
         reader = new StreamReader(fileStream);
     }
 

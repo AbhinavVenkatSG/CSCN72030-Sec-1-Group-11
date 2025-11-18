@@ -1,5 +1,4 @@
-﻿
-using FalloutBunkerManager.Devices;
+﻿using FalloutBunkerManager.Devices;
 
 namespace FalloutBunkerManager
 {
@@ -7,20 +6,22 @@ namespace FalloutBunkerManager
     {
         static void Main(string[] args)
         {
-            string sensorFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "SensorEmulationFiles");
 
-            IDevice[] devices =
+            
+
+            IDevice[] devices = new IDevice[]
             {
-                new Thermometer(sensorFolder),
-                new WaterSensor(sensorFolder),
-                new FoodSensor(sensorFolder),
-                new Generator(sensorFolder),
-                new O2Scrubber(sensorFolder),
-                new HealthMonitor(sensorFolder),
-                new Dosimeter(sensorFolder)
+                new Thermometer(),
+                new WaterSensor(),
+                new FoodSensor(),
+                new Generator(),
+                new O2Scrubber(),
+                new HealthMonitor(),
+                new Dosimeter()
             };
 
             var scadaController = new ScadaController(devices);
+
             scadaController.MainLoop();
         }
     }
