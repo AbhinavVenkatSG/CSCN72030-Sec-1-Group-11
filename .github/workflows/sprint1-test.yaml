@@ -1,64 +1,60 @@
-name: Sprint 1 Tests
+name: SCADA Backend + API Tests
 
 on:
-  workflow_dispatch: 
+  workflow_dispatch:      
   push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
+    branches: [ main ]    
 jobs:
-  level1-mstest:
-    name: Level 1 - MSTest Unit Tests
-    runs-on: windows-latest
+  scada-pipeline:
+    runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+  
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: 9.0.x
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'
 
-      - name: Restore .NET dependencies
-        run: dotnet restore ./Tests/Backend/IDeviceTests/DeviceFileReadTests.csproj
 
-      - name: Build backend
-        run: dotnet build ./Tests/Backend/IDeviceTests/DeviceFileReadTests.csproj --configuration Release
+    - name: Restore Test Project
+      run: dotnet restore ./Tests/Backend/IDeviceTests/IDeviceTests.csproj
 
-      - name: Run MSTest Unit Tests
-        run: dotnet test ./Tests/Backend/IDeviceTests/DeviceFileReadTests.csproj --configuration Release --no-build --verbosity normal
+    - name: Build Test Project
+      run: dotnet build ./Tests/Backend/IDeviceTests/IDeviceTests.csproj --configuration Release
 
-  level2-node:
-    name: Level 2 - Device API / File Read Test
-    runs-on: windows-latest
-    needs: level1-mstest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Run MSTest Unit Tests (Level 1)
+      run: dotnet test ./Tests/Backend/IDeviceTests/IDeviceTests.csproj --configuration Release --no-build
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20.x'
 
-      - name: Install dependencies (if any)
-        run: npm install
-        working-directory: ./Tests/Backend
+    - name: Restore API Project
+      run: dotnet restore ./backend/FalloutBunkerApi/FalloutBunkerApi.csproj
 
-      - name: Run Level 2 Test
-        run: node poll-devices.mjs
-        working-directory: ./Tests/Backend
+    - name: Build API Project
+      run: dotnet build ./backend/FalloutBunkerApi/FalloutBunkerApi.csproj --configuration Release
 
-  level3-playwright:
-    name: Level 3 - Playwright UI Tests (placeholder)
-    runs-on: windows-latest
-    needs: level2-node
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Start API in background (Level 2)
+      run: |
+        echo "Starting ASP.NET Core API..."
+        dotnet run --project ./backend/FalloutBunkerApi/FalloutBunkerApi.csproj &
+        sleep 10   # give API time to start
 
-      - name: Placeholder
-        run: echo "Playwright tests will be added in Sprint 2"
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install Node Dependencies
+      run: npm install
+      working-directory: ./Tests/Backend
+
+    - name: Run Level 2 Device API Tests
+      run: node poll-devices.mjs
+      working-directory: ./Tests/Backend
+
+    - name: Run Level 3 Playwright UI Tests (placeholder)
+      run: echo "Playwright tests will be added in Sprint 2"
