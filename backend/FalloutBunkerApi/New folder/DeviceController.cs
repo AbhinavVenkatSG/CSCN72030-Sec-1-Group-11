@@ -12,7 +12,6 @@ namespace FalloutBunkerApi.Controllers
         private static readonly IDevice[] devices;
         private static readonly int[] queryCounters;
 
-    
         static DeviceController()
         {
 

@@ -9,14 +9,16 @@ public class HealthMonitor : IDevice
     public FileManager fileManager { get; }
     public DeviceType type { get { return DeviceType.HealthMonitor; } }
     public string filePath { get; } = Path.Combine("SensorEmulationFiles", "HealthLevels.dat");
+    private BunkerStatuses bunkerStatuses;
 
     private float currentHealth { get; set; } = 100.0f;
     private const float MAX_HEALTH = 100f;
     private const float MIN_HEALTH = 0f;
 
     // Constructor
-    public HealthMonitor()
+    public HealthMonitor(BunkerStatuses bunkerStatuses)
     {
+        this.bunkerStatuses = bunkerStatuses;
         fileManager = new FileManager(filePath);
     }
 
@@ -24,6 +26,11 @@ public class HealthMonitor : IDevice
     public DeviceStatus QueryLatest()
     {
         float readInValue = fileManager.GetNextValue();
+
+        if (bunkerStatuses.LightsOn == false)
+        {
+            readInValue *= 2;
+        }
 
         currentHealth += readInValue;
 
