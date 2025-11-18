@@ -7,17 +7,17 @@ namespace FalloutBunkerManager
         static void Main(string[] args)
         {
 
-            
+            var bunkerStatuses = new BunkerStatuses();
 
             IDevice[] devices = new IDevice[]
             {
-                new Thermometer(),
-                new WaterSensor(),
-                new FoodSensor(),
-                new Generator(),
-                new O2Scrubber(),
-                new HealthMonitor(),
-                new Dosimeter()
+                new Thermometer(bunkerStatuses),
+                new WaterSensor(bunkerStatuses),
+                new FoodSensor(bunkerStatuses),
+                new Generator(bunkerStatuses),
+                new O2Scrubber(bunkerStatuses),
+                new HealthMonitor(bunkerStatuses),
+                new Dosimeter(bunkerStatuses)
             };
 
             var scadaController = new ScadaController(devices);
