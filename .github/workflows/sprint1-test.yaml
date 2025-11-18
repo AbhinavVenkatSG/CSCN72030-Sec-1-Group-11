@@ -1,6 +1,7 @@
 name: Sprint 1 Tests
 
 on:
+  workflow_dispatch: 
   push:
     branches:
       - main
