@@ -1,13 +1,15 @@
 using FalloutBunkerManager.Devices;
 
+namespace FalloutBunkerManager;
+
 class ScadaController
 {
-    private IDevice[] deviceList;
+    private readonly DeviceNetwork deviceNetwork;
 
     // Constructor
-    public ScadaController(IDevice[] devices)
+    public ScadaController(DeviceNetwork deviceNetwork)
     {
-        deviceList = devices;
+        this.deviceNetwork = deviceNetwork;
     }
 
     public void MainLoop()
@@ -32,14 +34,6 @@ class ScadaController
     /// <returns> A list of devices statuses </returns>
     public DeviceStatus[] QueryDevices()
     {
-        var deviceStatuses = new DeviceStatus[deviceList.Length];
-
-        for (int i = 0; i < deviceList.Length; i++)
-        {
-            DeviceStatus status = deviceList[i].QueryLatest();
-            deviceStatuses[i] = status;
-        }
-
-        return deviceStatuses;
+        return deviceNetwork.QueryDevices();
     }
 }
