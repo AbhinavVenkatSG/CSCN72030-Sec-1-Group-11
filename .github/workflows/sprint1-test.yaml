@@ -1,4 +1,4 @@
-name: SCADA Backend + API Tests
+name: Sprint-1-tests
 
 on:
   workflow_dispatch:      
