@@ -9,10 +9,12 @@ public class Thermometer : IDevice
     public FileManager fileManager { get; }
     public DeviceType type { get { return DeviceType.Thermometer; } }
     public string filePath { get; } = Path.Combine("SensorEmulationFiles", "Temperature.dat");
+    private BunkerStatuses bunkerStatuses;
 
     // Constructor
-    public Thermometer()
+    public Thermometer(BunkerStatuses bunkerStatuses)
     {
+        this.bunkerStatuses = bunkerStatuses;
         fileManager = new FileManager(filePath);
     }
 
@@ -20,6 +22,8 @@ public class Thermometer : IDevice
     public DeviceStatus QueryLatest()
     {
         float readInValue = fileManager.GetNextValue();
+
+        // do math
 
         return new DeviceStatus
         {
