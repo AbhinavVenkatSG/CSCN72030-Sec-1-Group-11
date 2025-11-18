@@ -1,30 +1,41 @@
-
-
+import LightSwitch from "@/components/LightSwitch/LightSwitch";
+import NextDay from "@/components/NextDay/NextDay";
+import RationLevel, {
+  RationLevelValue,
+} from "@/components/RationLevel/RationLevel";
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import Dosimeter from "../../components/Dosimeter/Dosimeter";
+import FoodMonitor from "../../components/FoodMonitor/FoodMonitor";
+import { useFoodMonitor } from "../../components/FoodMonitor/useFoodMonitor";
 import Generator from "../../components/Generator/Generator";
 import HealthMonitor from "../../components/HealthMonitor/HealthMonitor";
 import OxygenScrubber from "../../components/OxygenScrubber/OxygenScrubber";
+import OxygenScrubberThreshold from "../../components/OxygenScrubber/OxygenScrubberThreshold";
+import ScavengeToggle from "../../components/Scavenge/Scavenge";
 import Thermometer from "../../components/Thermometer/Thermometer";
-import FoodMonitor from "../../components/FoodMonitor/FoodMonitor";
 import WaterSensor from "../../components/WaterSensor/WaterSensor";
-import { useFoodMonitor } from "../../components/FoodMonitor/useFoodMonitor";
 
-// API config
+import {
+  SetLightThreshold,
+  SetNextDay,
+  SetRationLevel,
+  SetScavengeAtNight,
+  SetScrubberThreshold,
+} from "./../../BunkerActions/BunkerActions";
+
 const API_URL = "http://localhost:5244/api/device";
 const BASE_WIDTH = 1024;
 const BASE_HEIGHT = 768;
 
-// Mirror backend DeviceType enum
 enum DeviceType {
   Thermometer = 0,
   WaterSensor = 1,
   FoodSensor = 2,
-  Generator = 3,
+  GeneratorType = 3,
   O2Scrubber = 4,
-  HealthMonitor = 5,
-  Dosimeter = 6,
+  HealthMonitorType = 5,
+  DosimeterType = 6,
 }
 
 interface Device {
@@ -37,9 +48,13 @@ export default function HomeScreen() {
   const scale = Math.min(width / BASE_WIDTH, height / BASE_HEIGHT);
 
   const [devices, setDevices] = useState<Device[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  // Helper to get device value by enum
+  const [powerPercent, setPowerPercent] = useState(50);
+  const [rationLevel, setRationLevelState] =
+    useState<RationLevelValue>("medium");
+  const [o2Threshold, setO2ThresholdState] = useState(80);
+  const [scavengeAtNight, setScavengeAtNightState] = useState(false);
+
   const getValue = (type: DeviceType) => {
     const device = devices.find((d) => d.type === type);
     return device?.currentValue ?? 0;
@@ -58,7 +73,6 @@ export default function HomeScreen() {
         const res = await fetch(API_URL);
         const data: Device[] = await res.json();
         setDevices(data);
-        setLoading(false);
       } catch (err) {
         console.error("Error fetching device data:", err);
       } finally {
@@ -66,44 +80,119 @@ export default function HomeScreen() {
       }
     };
 
-    fetchDevices(); // initial fetch
-    const interval = setInterval(fetchDevices, 3000); // poll every 3 seconds
+    fetchDevices();
+    const interval = setInterval(fetchDevices, 3000);
     return () => clearInterval(interval);
   }, []);
+
+  const handleApplyGeneratorPower = async () => {
+    await SetLightThreshold(powerPercent);
+  };
+
+  const handleApplyOxygenScrubberThreshold = async () => {
+    await SetScrubberThreshold(o2Threshold);
+  };
+
+  const handleNextDay = async () => {
+    await SetNextDay({
+      powerPercent,
+      rationLevel,
+      o2Threshold,
+      scavengeAtNight,
+    });
+  };
 
   return (
     <View style={styles.viewport}>
       <View style={[styles.scaleWrapper, { transform: [{ scale }] }]}>
         <View style={styles.container}>
-          {/* Health Monitor at top */}
+          {/* FULL-WIDTH HEALTH BAR */}
           <View style={styles.healthContainer} data-testid="health-value">
-            <HealthMonitor value={getValue(DeviceType.HealthMonitor)} />
+            <HealthMonitor value={getValue(DeviceType.HealthMonitorType)} />
           </View>
 
-          {/* Resource row */}
-          <View style={styles.resourceRow}>
-            <View style={styles.resourceModule} data-testid="water-value">
-              <WaterSensor value={getValue(DeviceType.WaterSensor)} />
+          {/* MAIN CONTENT ROW */}
+          <View style={styles.mainRow}>
+            {/* LEFT CLUSTER */}
+            <View style={styles.leftColumn}>
+              <View style={styles.resourceRow}>
+                {/* FOOD */}
+                <View style={styles.resourceModule} data-testid="food-value">
+                  <FoodMonitor value={foodValue} />
+                </View>
+
+                {/* WATER */}
+                <View style={styles.resourceModule} data-testid="water-value">
+                  <WaterSensor value={getValue(DeviceType.WaterSensor)} />
+                </View>
+
+                {/* GENERATOR POWER CONTROL */}
+                <View style={styles.resourceModule}>
+                  <LightSwitch
+                    value={powerPercent}
+                    onChange={setPowerPercent}
+                    onApply={handleApplyGeneratorPower}
+                  />
+                </View>
+
+                {/* GENERATOR */}
+                <View
+                  style={styles.resourceModule}
+                  data-testid="generator-value"
+                >
+                  <Generator value={getValue(DeviceType.GeneratorType)} />
+                </View>
+
+                {/* O2 SCRUBBER + THRESHOLD */}
+                <View
+                  style={styles.resourceModule}
+                  data-testid="o2scrubber-value"
+                >
+                  <OxygenScrubber value={getValue(DeviceType.O2Scrubber)} />
+                  <OxygenScrubberThreshold
+                    value={o2Threshold}
+                    onChange={setO2ThresholdState}
+                    onApply={handleApplyOxygenScrubberThreshold}
+                  />
+                </View>
+              </View>
             </View>
-            <View style={styles.resourceModule} data-testid="generator-value">
-              <Generator value={getValue(DeviceType.Generator)} />
-            </View>
-            <View style={styles.resourceModule} data-testid="o2scrubber-value">
-              <OxygenScrubber value={getValue(DeviceType.O2Scrubber)} />
-            </View>
-            <View style={styles.resourceModule} data-testid="food-value">
-              <FoodMonitor value={foodValue} />
+
+            {/* RIGHT: EXTERIOR VALUES */}
+            <View style={styles.exteriorBox}>
+              <Text style={styles.exteriorTitle}>Exterior Values</Text>
+
+              <View style={styles.exteriorItem} data-testid="thermometer-value">
+                <Thermometer value={getValue(DeviceType.Thermometer)} />
+              </View>
+
+              <View style={styles.exteriorItem} data-testid="dosimeter-value">
+                <Dosimeter value={getValue(DeviceType.DosimeterType)} />
+              </View>
             </View>
           </View>
 
-          {/* Exterior values */}
-          <View style={styles.exteriorBox}>
-            <Text style={styles.exteriorTitle}>Exterior Values</Text>
-            <View style={styles.exteriorItem} data-testid="thermometer-value">
-              <Thermometer value={getValue(DeviceType.Thermometer)} />
-            </View>
-            <View style={styles.exteriorItem} data-testid="dosimeter-value">
-              <Dosimeter value={getValue(DeviceType.Dosimeter)} />
+          {/* BOTTOM BAR */}
+          <View style={styles.bottomRow}>
+            {/* RATION LEVEL */}
+            <RationLevel
+              value={rationLevel}
+              onChange={async (level) => {
+                setRationLevelState(level);
+                await SetRationLevel(level);
+              }}
+            />
+
+            {/* SCAVENGE + NEXT DAY */}
+            <View style={styles.bottomRightColumn}>
+              <ScavengeToggle
+                value={scavengeAtNight}
+                onChange={async (enabled) => {
+                  setScavengeAtNightState(enabled);
+                  await SetScavengeAtNight(enabled);
+                }}
+              />
+              <NextDay onPress={handleNextDay} />
             </View>
           </View>
         </View>
@@ -123,39 +212,48 @@ const styles = StyleSheet.create({
     width: BASE_WIDTH,
     height: BASE_HEIGHT,
     alignItems: "stretch",
+    marginLeft: 80,
   },
   container: {
     flex: 1,
     padding: 16,
     backgroundColor: "#212121ff",
+    justifyContent: "space-between",
   },
   healthContainer: {
-    marginTop: 12,
+    width: "100%",
     alignSelf: "stretch",
     alignItems: "center",
-    gap: 6,
+    marginTop: 8,
+    marginBottom: 16,
+  },
+  mainRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    flex: 1,
+  },
+  leftColumn: {
+    flex: 1,
   },
   resourceRow: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
     gap: 40,
-    marginTop: 120,
-    alignSelf: "flex-end",
-    marginRight: 250,
+    marginTop: 5,
   },
   resourceModule: {
     alignItems: "center",
   },
   exteriorBox: {
-    position: "absolute",
-    right: 16,
-    top: "25%",
     borderWidth: 2,
     borderColor: "#fff",
     borderRadius: 8,
     padding: 12,
     alignItems: "center",
+    marginLeft: 100,
+    marginTop: 20,
   },
   exteriorTitle: {
     color: "#fff",
@@ -166,5 +264,16 @@ const styles = StyleSheet.create({
   exteriorItem: {
     alignItems: "center",
     marginVertical: 8,
+  },
+  bottomRow: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+    marginTop: 16,
+  },
+  bottomRightColumn: {
+    alignItems: "flex-end",
+    gap: 8,
   },
 });

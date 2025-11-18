@@ -30,7 +30,7 @@ public class Generator : IDevice
         // Ensures gas level stays within bounds
         if (curGasLevel > MAX_GAS_LEVEL) curGasLevel = MAX_GAS_LEVEL;
         if (curGasLevel < MIN_GAS_LEVEL) curGasLevel = MIN_GAS_LEVEL;
-
+        
         return new DeviceStatus
         { 
             type = DeviceType.Generator,

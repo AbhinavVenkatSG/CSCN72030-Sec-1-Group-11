@@ -65,7 +65,7 @@ export default function FoodMonitor({ value }: Props) {
                 <View style={[styles.fill, { height: `${safeValue}%`, backgroundColor: fillColor }]} />
             </View>
             <Text style={styles.value}>{safeValue}%</Text>
-            <Text style={styles.label}>Food Monitor</Text>
+            <Text style={styles.label}>🍎 Food Monitor</Text>
         </View>
     );
 }
