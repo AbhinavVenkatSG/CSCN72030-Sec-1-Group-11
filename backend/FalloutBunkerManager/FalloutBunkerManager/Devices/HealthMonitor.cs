@@ -27,11 +27,35 @@ public class HealthMonitor : IDevice
     {
         float readInValue = fileManager.GetNextValue();
 
-        if (bunkerStatuses.LightsOn == false)
+        if (bunkerStatuses.isScavenging == true)
         {
-            readInValue *= 2;
+            currentHealth *= 0.8f;  // health goes down by 20%
+            // scanvenging on now we check the radiation level
+            if (bunkerStatuses.raditaionLevel > 20 && bunkerStatuses.raditaionLevel < 60)
+            {
+                currentHealth *= 0.8f; // additional 20% decrease
+            }
+            else if (bunkerStatuses.raditaionLevel >= 60)
+            {
+                currentHealth *= 05f; // additional 50% decrease
+            }
         }
 
+        if (bunkerStatuses.rationStatus > 2)
+        {
+            currentHealth *= 0.8f;
+        }
+
+        if (bunkerStatuses.rationStatus < 2)
+        {
+            currentHealth *= 0.8f;
+        }
+
+        if (bunkerStatuses.lightsOn == false)
+        {
+            currentHealth *= 0.8f;
+        }
+      
         currentHealth += readInValue;
 
         // Ensures health stays within bounds

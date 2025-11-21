@@ -14,16 +14,44 @@ public class Generator : IDevice
     private const float MAX_GAS_LEVEL = 100f;
     private const float MIN_GAS_LEVEL = 0f;
 
+    private BunkerStatuses bunkerStatuses;
+
+
     // Constructor
-    public Generator()
+    public Generator(BunkerStatuses bunkerStatuses)
     {
+        this.bunkerStatuses = bunkerStatuses;
         fileManager = new FileManager(filePath);
     }
 
     // Methods
     public DeviceStatus QueryLatest()
     {
+
+        if (bunkerStatuses.isScavenging == true)
+        {
+            curGasLevel *= 1.2f;
+        }
+
+
         float readInValue = fileManager.GetNextValue();
+
+        if (bunkerStatuses.lightsOn == false)
+        {
+            readInValue = readInValue / 2;
+        }
+        else
+        {
+            readInValue *= 2;
+        }
+        
+        if (bunkerStatuses.O2ScrubberPower > 0)
+        {
+            readInValue += bunkerStatuses.O2ScrubberPower / 10;
+        }
+
+
+        
 
         curGasLevel += readInValue;
 
