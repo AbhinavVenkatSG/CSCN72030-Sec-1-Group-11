@@ -4,9 +4,14 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 export default function Thermometer({ value }: { value: number }) {
+  const isHot = value > 35;
+
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Temperature</Text>
+      <Text style={styles.label}>
+        {isHot ? "🔥 Temperature" : "Temperature"}
+      </Text>
+
       <View style={styles.box}>
         <Text style={styles.value}>{value}</Text>
         <Text style={styles.symbol}>°C</Text>

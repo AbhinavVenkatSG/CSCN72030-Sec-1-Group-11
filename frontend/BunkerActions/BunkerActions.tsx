@@ -4,7 +4,9 @@
 
 import type { RationLevelValue } from "@/components/RationLevel/RationLevel";
 
-export async function SetRationLevel(level: RationLevelValue): Promise<RationLevelValue> {
+export async function SetRationLevel(
+  level: RationLevelValue
+): Promise<RationLevelValue> {
   console.log("SetRationLevel called with:", level);
   // TODO: replace with API call later
   return level;
@@ -22,8 +24,18 @@ export async function SetLightThreshold(percent: number): Promise<number> {
   return percent;
 }
 
-export async function SetScavengeAtNight(enabled: boolean): Promise<boolean> {
+export async function SetScavengeAtNight(
+  enabled: boolean
+): Promise<boolean> {
   console.log("SetScavengeAtNight called with:", enabled);
+  // TODO: replace with API call later
+  return enabled;
+}
+
+export async function SetCoolDownAtNight(
+  enabled: boolean
+): Promise<boolean> {
+  console.log("SetCoolDownAtNight called with:", enabled);
   // TODO: replace with API call later
   return enabled;
 }
@@ -33,9 +45,12 @@ export type NextDayPayload = {
   rationLevel: RationLevelValue;
   o2Threshold: number;
   scavengeAtNight: boolean;
+  coolDownAtNight: boolean;
 };
 
-export async function SetNextDay(payload: NextDayPayload): Promise<NextDayPayload> {
+export async function SetNextDay(
+  payload: NextDayPayload
+): Promise<NextDayPayload> {
   console.log("SetNextDay called with:", payload);
   // TODO: replace with API call later
   return payload;
