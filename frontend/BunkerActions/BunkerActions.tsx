@@ -4,6 +4,13 @@
 
 import type { RationLevelValue } from "@/components/RationLevel/RationLevel";
 
+const DEVICE_API_URL = "http://localhost:5244/api/device";
+
+export type DeviceStatus = {
+  type: number;
+  currentValue: number;
+};
+
 export async function SetRationLevel(level: RationLevelValue): Promise<RationLevelValue> {
   console.log("SetRationLevel called with:", level);
   // TODO: replace with API call later
@@ -35,8 +42,21 @@ export type NextDayPayload = {
   scavengeAtNight: boolean;
 };
 
-export async function SetNextDay(payload: NextDayPayload): Promise<NextDayPayload> {
+export async function SetNextDay(
+  payload: NextDayPayload
+): Promise<DeviceStatus[]> {
   console.log("SetNextDay called with:", payload);
-  // TODO: replace with API call later
-  return payload;
+
+  try {
+    const response = await fetch(DEVICE_API_URL);
+    if (!response.ok) {
+      throw new Error("Failed to fetch device data");
+    }
+
+    const devices: DeviceStatus[] = await response.json();
+    return devices;
+  } catch (error) {
+    console.error("Error advancing to next day:", error);
+    throw error;
+  }
 }
