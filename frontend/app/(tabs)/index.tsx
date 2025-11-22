@@ -5,6 +5,7 @@ import RationLevel, {
 } from "@/components/RationLevel/RationLevel";
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import CoolDown from "../../components/CoolDown/CoolDown";
 import Dosimeter from "../../components/Dosimeter/Dosimeter";
 import FoodMonitor from "../../components/FoodMonitor/FoodMonitor";
 import { useFoodMonitor } from "../../components/FoodMonitor/useFoodMonitor";
@@ -18,6 +19,7 @@ import WaterSensor from "../../components/WaterSensor/WaterSensor";
 
 import {
   DeviceStatus,
+  SetCoolDownAtNight,
   SetLightThreshold,
   SetNextDay,
   SetRationLevel,
@@ -67,10 +69,19 @@ export default function HomeScreen() {
 
   const getValue = (type: DeviceType) => {
     const device = devices.find((d) => d.type === type);
-    return device?.currentValue ?? 0;
+    return device?.currentValue ?? 50; // default 50 if missing
   };
 
   const foodValue = useFoodMonitor(getValue(DeviceType.FoodSensor));
+  const thermometerValue = getValue(DeviceType.Thermometer);
+
+  // 🔆 Dynamic background based on generator power / light threshold
+  const backgroundColor =
+    powerPercent > 50
+      ? "#3a3a6a" // lighter – plenty of power
+      : powerPercent < 30
+      ? "#050509" // very dark – low power mode
+      : "#212121"; // default mid tone
 
   useEffect(() => {
     const loadInitialDevices = async () => {
@@ -109,9 +120,14 @@ export default function HomeScreen() {
   };
 
   return (
-    <View style={styles.viewport}>
-      <View style={[styles.scaleWrapper, { transform: [{ scale }] }]}>
-        <View style={styles.container}>
+    <View style={[styles.viewport, { backgroundColor }]}>
+      <View
+        style={[
+          styles.scaleWrapper,
+          { backgroundColor, transform: [{ scale }] },
+        ]}
+      >
+        <View style={[styles.container, { backgroundColor }]}>
           {/* FULL-WIDTH HEALTH BAR */}
           <View style={styles.healthContainer} data-testid="health-value">
             <HealthMonitor value={getValue(DeviceType.HealthMonitorType)} />
@@ -164,12 +180,30 @@ export default function HomeScreen() {
               </View>
             </View>
 
-            {/* RIGHT: EXTERIOR VALUES */}
+            {/* RIGHT: EXTERIOR VALUES + COOL DOWN */}
             <View style={styles.exteriorBox}>
               <Text style={styles.exteriorTitle}>Exterior Values</Text>
 
-              <View style={styles.exteriorItem} data-testid="thermometer-value">
-                <Thermometer value={getValue(DeviceType.Thermometer)} />
+              {/* THERMOMETER WITH HOT BACKGROUND WHEN > 35 */}
+              <View
+                style={[
+                  styles.exteriorItem,
+                  thermometerValue > 35 && styles.exteriorItemHot,
+                ]}
+                data-testid="thermometer-value"
+              >
+                <Thermometer value={thermometerValue} />
+              </View>
+
+              {/* COOL DOWN AT NIGHT TOGGLE NEAR TEMPERATURE */}
+              <View style={styles.coolDownWrapper}>
+                <CoolDown
+                  value={coolDownAtNight}
+                  onChange={async (enabled) => {
+                    setCoolDownAtNight(enabled);
+                    await SetCoolDownAtNight(enabled);
+                  }}
+                />
               </View>
 
               <View style={styles.exteriorItem} data-testid="dosimeter-value">
@@ -210,7 +244,6 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   viewport: {
     flex: 1,
-    backgroundColor: "#212121ff",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -223,7 +256,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: "#212121ff",
     justifyContent: "space-between",
   },
   healthContainer: {
@@ -270,6 +302,16 @@ const styles = StyleSheet.create({
   exteriorItem: {
     alignItems: "center",
     marginVertical: 8,
+  },
+  exteriorItemHot: {
+    backgroundColor: "#802020",
+    borderRadius: 8,
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+  },
+  coolDownWrapper: {
+    marginTop: 4,
+    marginBottom: 8,
   },
   bottomRow: {
     width: "100%",

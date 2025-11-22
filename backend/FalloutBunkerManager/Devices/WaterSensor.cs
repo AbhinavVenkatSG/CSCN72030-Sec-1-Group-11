@@ -1,4 +1,4 @@
-// INSERT AUTHOR NAME HERE
+// Rami and Devki
 // Water Sensor Device, reads delta water values from a file
 
 namespace FalloutBunkerManager.Devices;
@@ -14,9 +14,12 @@ public class WaterSensor : IDevice
     private const float MAX_WATER = 100f;
     private const float MIN_WATER = 0f;
 
+    private BunkerStatuses bunkerStatuses;
+
     // Constructor
-    public WaterSensor()
+    public WaterSensor(BunkerStatuses bunkerStatuses)
     {
+        this.bunkerStatuses = bunkerStatuses;
         fileManager = new FileManager(filePath);
     }
 
@@ -24,6 +27,11 @@ public class WaterSensor : IDevice
     public DeviceStatus QueryLatest()
     {
         float readInValue = fileManager.GetNextValue();
+
+        if (bunkerStatuses.isScavenging == true)
+        {
+            currentWaterLevel *= 1.2f;
+        }
 
         currentWaterLevel += readInValue;
 

@@ -13,9 +13,12 @@ public class FoodSensor : IDevice
     private float MAX_FOOD = 100f;
     private float MIN_FOOD = 0f;
 
+    private BunkerStatuses bunkerStatuses;
+
     // Constructor
-    public FoodSensor()
+    public FoodSensor(BunkerStatuses bunkerStatuses)
     {
+        this.bunkerStatuses = bunkerStatuses;
         fileManager = new FileManager(filePath);
     }
 
@@ -23,6 +26,21 @@ public class FoodSensor : IDevice
     public DeviceStatus QueryLatest()
     {
         float readInValue = fileManager.GetNextValue();
+
+        if (bunkerStatuses.isScavenging == true)
+        {
+            currentFoodLevel *= 1.2f;
+        }
+
+        if (bunkerStatuses.rationStatus > 2)
+        {
+            readInValue *= 2;
+        }
+
+        if (bunkerStatuses.rationStatus < 2)
+        {
+            readInValue  /= 2;
+        }
 
         currentFoodLevel += readInValue;
 

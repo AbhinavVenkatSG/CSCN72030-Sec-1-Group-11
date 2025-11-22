@@ -21,7 +21,7 @@ export default function LightSwitch({
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Generator Power</Text>
+      <Text style={styles.label}>Light Threshold</Text>
 
       {/* tap anywhere on the box OR blur input to apply */}
       <Pressable>
@@ -36,7 +36,7 @@ export default function LightSwitch({
             onBlur={onApply}
             maxLength={3}
           />
-
+          
           <Text style={styles.percentSymbol}>%</Text>
         </View>
       </Pressable>

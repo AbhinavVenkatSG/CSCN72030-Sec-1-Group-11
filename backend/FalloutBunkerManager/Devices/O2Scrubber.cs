@@ -14,9 +14,13 @@ public class O2Scrubber : IDevice
     private const float MAX_O2_LEVEL = 100f;
     private const float MIN_O2_LEVEL = 0f;
 
+    private BunkerStatuses bunkerStatuses;
+
+
     // Constructor
-    public O2Scrubber()
+    public O2Scrubber(BunkerStatuses bunkerStatuses)
     {
+        this.bunkerStatuses = bunkerStatuses;
         fileManager = new FileManager(filePath);
     }
 
@@ -24,6 +28,10 @@ public class O2Scrubber : IDevice
     public DeviceStatus QueryLatest()
     {
         float readInValue = fileManager.GetNextValue();
+        if (bunkerStatuses.O2ScrubberPower > 0)
+        {
+            curO2Level += bunkerStatuses.O2ScrubberPower / 10;
+        }
 
         curO2Level += readInValue;
 
