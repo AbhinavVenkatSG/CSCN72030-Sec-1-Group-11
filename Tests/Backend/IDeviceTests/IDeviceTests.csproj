@@ -17,13 +17,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\backend\FalloutBunkerManager\FalloutBunkerManager\FalloutBunkerManager.csproj" />
+    <ProjectReference Include="..\..\..\backend\FalloutBunkerManager\FalloutBunkerManager.csproj" />
   </ItemGroup>
 
 
   <ItemGroup>
-    <!-- Copy SensorEmulationFiles to output directory -->
-    <None Update="TestResults\SensorEmulationFiles\*">
+    <!-- Copy shared SensorEmulationFiles from backend into the test output -->
+    <None Include="..\..\..\backend\FalloutBunkerManager\SensorEmulationFiles\**\*">
+      <Link>SensorEmulationFiles\%(RecursiveDir)%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

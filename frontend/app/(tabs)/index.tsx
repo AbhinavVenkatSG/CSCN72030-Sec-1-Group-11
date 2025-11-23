@@ -18,17 +18,21 @@ import Thermometer from "../../components/Thermometer/Thermometer";
 import WaterSensor from "../../components/WaterSensor/WaterSensor";
 
 import {
-  SetCoolDownAtNight,
-  SetLightThreshold,
+  DeviceStatus,
   SetNextDay,
-  SetRationLevel,
-  SetScavengeAtNight,
-  SetScrubberThreshold,
+  type NextDayPayload,
 } from "./../../BunkerActions/BunkerActions";
 
-const API_URL = "http://localhost:5244/api/device";
 const BASE_WIDTH = 1024;
 const BASE_HEIGHT = 768;
+
+const INITIAL_NEXT_DAY_SETTINGS: NextDayPayload = {
+  powerPercent: 50,
+  rationLevel: "medium",
+  o2Threshold: 80,
+  scavengeAtNight: false,
+  coolDownAtNight: false,
+};
 
 enum DeviceType {
   Thermometer = 0,
@@ -40,23 +44,27 @@ enum DeviceType {
   DosimeterType = 6,
 }
 
-interface Device {
-  type: number;
-  currentValue: number;
-}
-
 export default function HomeScreen() {
   const { width, height } = useWindowDimensions();
   const scale = Math.min(width / BASE_WIDTH, height / BASE_HEIGHT);
 
-  const [devices, setDevices] = useState<Device[]>([]);
+  const [devices, setDevices] = useState<DeviceStatus[]>([]);
 
-  const [powerPercent, setPowerPercent] = useState(50);
-  const [rationLevel, setRationLevelState] =
-    useState<RationLevelValue>("medium");
-  const [o2Threshold, setO2ThresholdState] = useState(80);
-  const [scavengeAtNight, setScavengeAtNightState] = useState(false);
-  const [coolDownAtNight, setCoolDownAtNight] = useState(false);
+  const [powerPercent, setPowerPercent] = useState(
+    INITIAL_NEXT_DAY_SETTINGS.powerPercent
+  );
+  const [rationLevel, setRationLevelState] = useState<RationLevelValue>(
+    INITIAL_NEXT_DAY_SETTINGS.rationLevel
+  );
+  const [o2Threshold, setO2ThresholdState] = useState(
+    INITIAL_NEXT_DAY_SETTINGS.o2Threshold
+  );
+  const [scavengeAtNight, setScavengeAtNightState] = useState(
+    INITIAL_NEXT_DAY_SETTINGS.scavengeAtNight
+  );
+  const [coolDownAtNight, setCoolDownAtNight] = useState(
+    INITIAL_NEXT_DAY_SETTINGS.coolDownAtNight
+  );
 
   const getValue = (type: DeviceType) => {
     const device = devices.find((d) => d.type === type);
@@ -65,54 +73,44 @@ export default function HomeScreen() {
 
   const foodValue = useFoodMonitor(getValue(DeviceType.FoodSensor));
   const thermometerValue = getValue(DeviceType.Thermometer);
+  const generatorValue = getValue(DeviceType.GeneratorType);
 
-  // 🔆 Dynamic background based on generator power / light threshold
-  const backgroundColor =
-    powerPercent > 50
-      ? "#3a3a6a" // lighter – plenty of power
-      : powerPercent < 30
-      ? "#050509" // very dark – low power mode
-      : "#212121"; // default mid tone
+  // Lights flip based on whether gas meets/exceeds the threshold.
+  const lightsOn = generatorValue >= powerPercent;
+
+  // Two-state background tied to lights on/off.
+  const backgroundColor = lightsOn ? "#3a3a6a" : "#050509";
 
   useEffect(() => {
-    let isFetching = false;
-
-    const fetchDevices = async () => {
-      if (isFetching) return;
-      isFetching = true;
-
+    const loadInitialDevices = async () => {
       try {
-        const res = await fetch(API_URL);
-        const data: Device[] = await res.json();
-        setDevices(data);
+        const initialDevices = await SetNextDay(INITIAL_NEXT_DAY_SETTINGS);
+        setDevices(initialDevices);
       } catch (err) {
-        console.error("Error fetching device data:", err);
-      } finally {
-        isFetching = false;
+        console.error("Error fetching initial device data:", err);
       }
     };
 
-    fetchDevices();
-    const interval = setInterval(fetchDevices, 3000);
-    return () => clearInterval(interval);
+    loadInitialDevices();
   }, []);
 
-  const handleApplyGeneratorPower = async () => {
-    await SetLightThreshold(powerPercent);
-  };
-
-  const handleApplyOxygenScrubberThreshold = async () => {
-    await SetScrubberThreshold(o2Threshold);
-  };
-
   const handleNextDay = async () => {
-    await SetNextDay({
-      powerPercent,
-      rationLevel,
-      o2Threshold,
-      scavengeAtNight,
-      coolDownAtNight,
-    });
+    try {
+      const updatedDevices = await SetNextDay({
+        powerPercent,
+        rationLevel,
+        o2Threshold,
+        scavengeAtNight,
+        coolDownAtNight,
+      });
+      setDevices(updatedDevices);
+
+      // Reset nightly toggles after advancing the day.
+      setScavengeAtNightState(false);
+      setCoolDownAtNight(false);
+    } catch (err) {
+      console.error("Error advancing to next day:", err);
+    }
   };
 
   return (
@@ -149,7 +147,7 @@ export default function HomeScreen() {
                   <LightSwitch
                     value={powerPercent}
                     onChange={setPowerPercent}
-                    onApply={handleApplyGeneratorPower}
+                    lightsOn={lightsOn}
                   />
                 </View>
 
@@ -170,7 +168,6 @@ export default function HomeScreen() {
                   <OxygenScrubberThreshold
                     value={o2Threshold}
                     onChange={setO2ThresholdState}
-                    onApply={handleApplyOxygenScrubberThreshold}
                   />
                 </View>
               </View>
@@ -184,7 +181,7 @@ export default function HomeScreen() {
               <View
                 style={[
                   styles.exteriorItem,
-                  thermometerValue > 35 && styles.exteriorItemHot,
+                  thermometerValue >= 35 && styles.exteriorItemHot,
                 ]}
                 data-testid="thermometer-value"
               >
@@ -195,10 +192,7 @@ export default function HomeScreen() {
               <View style={styles.coolDownWrapper}>
                 <CoolDown
                   value={coolDownAtNight}
-                  onChange={async (enabled) => {
-                    setCoolDownAtNight(enabled);
-                    await SetCoolDownAtNight(enabled);
-                  }}
+                  onChange={setCoolDownAtNight}
                 />
               </View>
 
@@ -213,20 +207,14 @@ export default function HomeScreen() {
             {/* RATION LEVEL */}
             <RationLevel
               value={rationLevel}
-              onChange={async (level) => {
-                setRationLevelState(level);
-                await SetRationLevel(level);
-              }}
+              onChange={setRationLevelState}
             />
 
             {/* SCAVENGE + NEXT DAY */}
             <View style={styles.bottomRightColumn}>
               <ScavengeToggle
                 value={scavengeAtNight}
-                onChange={async (enabled) => {
-                  setScavengeAtNightState(enabled);
-                  await SetScavengeAtNight(enabled);
-                }}
+                onChange={setScavengeAtNightState}
               />
               <NextDay onPress={handleNextDay} />
             </View>
