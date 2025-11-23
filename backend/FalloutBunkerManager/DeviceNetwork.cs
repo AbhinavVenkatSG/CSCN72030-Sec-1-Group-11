@@ -8,24 +8,27 @@ namespace FalloutBunkerManager;
 public class DeviceNetwork
 {
     private readonly IDevice[] devices;
+    private readonly BunkerStatuses bunkerStatuses;
 
-    public DeviceNetwork()
+    public DeviceNetwork(BunkerStatuses bunkerStatuses)
     {
-        var bunkerStatuses = new BunkerStatuses();
+        this.bunkerStatuses = bunkerStatuses;
 
         devices = new IDevice[]
         {
-            new Thermometer(bunkerStatuses),
-            new WaterSensor(),
-            new FoodSensor(),
-            new Generator(),
-            new O2Scrubber(),
+            // Order matters: run devices in the sequence defined in README.md.
             new HealthMonitor(bunkerStatuses),
-            new Dosimeter()
+            new FoodSensor(bunkerStatuses),
+            new WaterSensor(bunkerStatuses),
+            new O2Scrubber(bunkerStatuses),
+            new Generator(bunkerStatuses),
+            new Thermometer(bunkerStatuses),
+            new Dosimeter(bunkerStatuses)
         };
     }
 
     public IReadOnlyList<IDevice> Devices => devices;
+    public BunkerStatuses Statuses => bunkerStatuses;
 
     public DeviceStatus[] QueryDevices()
     {

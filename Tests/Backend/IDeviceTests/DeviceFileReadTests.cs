@@ -9,63 +9,55 @@ namespace IDeviceTests
     [TestClass]
     public class DeviceFileReadTests
     {
-        private readonly string sensorFolder;
-
-        public DeviceFileReadTests()
-        {
-            // Get the folder where the test output is running
-            var outputPath = Path.GetDirectoryName(typeof(DeviceFileReadTests).Assembly.Location);
-
-            // Point to the TestResults\SensorEmulationFiles directory
-            sensorFolder = Path.Combine(outputPath, "TestResults", "SensorEmulationFiles");
-        }
+        private readonly string sensorFolder = Path.Combine(AppContext.BaseDirectory, "SensorEmulationFiles");
+        private readonly BunkerStatuses bunkerStatuses = new();
 
         [TestMethod]
         public void ThermometerFile_Readable()
         {
-            var thermometer = new Thermometer(sensorFolder);
+            var thermometer = new Thermometer(bunkerStatuses);
             Assert.IsTrue(File.Exists(Path.Combine(sensorFolder, "Temperature.dat")));
         }
 
         [TestMethod]
         public void WaterSensorFile_Readable()
         {
-            var waterSensor = new WaterSensor(sensorFolder);
+            var waterSensor = new WaterSensor(bunkerStatuses);
             Assert.IsTrue(File.Exists(Path.Combine(sensorFolder, "WaterLevels.dat")));
         }
 
         [TestMethod]
         public void O2ScrubberFile_Readable()
         {
-            var o2Scrubber = new O2Scrubber(sensorFolder);
+            var o2Scrubber = new O2Scrubber(bunkerStatuses);
             Assert.IsTrue(File.Exists(Path.Combine(sensorFolder, "OxygenLevels.dat")));
         }
 
         [TestMethod]
         public void FoodSensorFile_Readable()
         {
-            var foodSensor = new FoodSensor(sensorFolder);
+            var foodSensor = new FoodSensor(bunkerStatuses);
             Assert.IsTrue(File.Exists(Path.Combine(sensorFolder, "FoodLevels.dat")));
         }
 
         [TestMethod]
         public void GeneratorFile_Readable()
         {
-            var generator = new Generator(sensorFolder);
+            var generator = new Generator(bunkerStatuses);
             Assert.IsTrue(File.Exists(Path.Combine(sensorFolder, "GasolineLevels.dat")));
         }
 
         [TestMethod]
         public void HealthMonitorFile_Readable()
         {
-            var healthMonitor = new HealthMonitor(sensorFolder);
+            var healthMonitor = new HealthMonitor(bunkerStatuses);
             Assert.IsTrue(File.Exists(Path.Combine(sensorFolder, "HealthLevels.dat")));
         }
 
         [TestMethod]
         public void DosimeterFile_Readable()
         {
-            var dosimeter = new Dosimeter(sensorFolder);
+            var dosimeter = new Dosimeter(bunkerStatuses);
             Assert.IsTrue(File.Exists(Path.Combine(sensorFolder, "RadiationLevels.dat")));
         }
     }

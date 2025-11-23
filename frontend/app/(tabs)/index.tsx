@@ -19,12 +19,7 @@ import WaterSensor from "../../components/WaterSensor/WaterSensor";
 
 import {
   DeviceStatus,
-  SetCoolDownAtNight,
-  SetLightThreshold,
   SetNextDay,
-  SetRationLevel,
-  SetScavengeAtNight,
-  SetScrubberThreshold,
   type NextDayPayload,
 } from "./../../BunkerActions/BunkerActions";
 
@@ -36,6 +31,7 @@ const INITIAL_NEXT_DAY_SETTINGS: NextDayPayload = {
   rationLevel: "medium",
   o2Threshold: 80,
   scavengeAtNight: false,
+  coolDownAtNight: false,
 };
 
 enum DeviceType {
@@ -66,6 +62,9 @@ export default function HomeScreen() {
   const [scavengeAtNight, setScavengeAtNightState] = useState(
     INITIAL_NEXT_DAY_SETTINGS.scavengeAtNight
   );
+  const [coolDownAtNight, setCoolDownAtNight] = useState(
+    INITIAL_NEXT_DAY_SETTINGS.coolDownAtNight
+  );
 
   const getValue = (type: DeviceType) => {
     const device = devices.find((d) => d.type === type);
@@ -74,14 +73,13 @@ export default function HomeScreen() {
 
   const foodValue = useFoodMonitor(getValue(DeviceType.FoodSensor));
   const thermometerValue = getValue(DeviceType.Thermometer);
+  const generatorValue = getValue(DeviceType.GeneratorType);
 
-  // 🔆 Dynamic background based on generator power / light threshold
-  const backgroundColor =
-    powerPercent > 50
-      ? "#3a3a6a" // lighter – plenty of power
-      : powerPercent < 30
-      ? "#050509" // very dark – low power mode
-      : "#212121"; // default mid tone
+  // Lights flip based on whether gas meets/exceeds the threshold.
+  const lightsOn = generatorValue >= powerPercent;
+
+  // Two-state background tied to lights on/off.
+  const backgroundColor = lightsOn ? "#3a3a6a" : "#050509";
 
   useEffect(() => {
     const loadInitialDevices = async () => {
@@ -96,15 +94,6 @@ export default function HomeScreen() {
     loadInitialDevices();
   }, []);
 
-
-  const handleApplyGeneratorPower = async () => {
-    await SetLightThreshold(powerPercent);
-  };
-
-  const handleApplyOxygenScrubberThreshold = async () => {
-    await SetScrubberThreshold(o2Threshold);
-  };
-
   const handleNextDay = async () => {
     try {
       const updatedDevices = await SetNextDay({
@@ -112,8 +101,13 @@ export default function HomeScreen() {
         rationLevel,
         o2Threshold,
         scavengeAtNight,
+        coolDownAtNight,
       });
       setDevices(updatedDevices);
+
+      // Reset nightly toggles after advancing the day.
+      setScavengeAtNightState(false);
+      setCoolDownAtNight(false);
     } catch (err) {
       console.error("Error advancing to next day:", err);
     }
@@ -153,7 +147,7 @@ export default function HomeScreen() {
                   <LightSwitch
                     value={powerPercent}
                     onChange={setPowerPercent}
-                    onApply={handleApplyGeneratorPower}
+                    lightsOn={lightsOn}
                   />
                 </View>
 
@@ -174,7 +168,6 @@ export default function HomeScreen() {
                   <OxygenScrubberThreshold
                     value={o2Threshold}
                     onChange={setO2ThresholdState}
-                    onApply={handleApplyOxygenScrubberThreshold}
                   />
                 </View>
               </View>
@@ -188,7 +181,7 @@ export default function HomeScreen() {
               <View
                 style={[
                   styles.exteriorItem,
-                  thermometerValue > 35 && styles.exteriorItemHot,
+                  thermometerValue >= 35 && styles.exteriorItemHot,
                 ]}
                 data-testid="thermometer-value"
               >
@@ -199,10 +192,7 @@ export default function HomeScreen() {
               <View style={styles.coolDownWrapper}>
                 <CoolDown
                   value={coolDownAtNight}
-                  onChange={async (enabled) => {
-                    setCoolDownAtNight(enabled);
-                    await SetCoolDownAtNight(enabled);
-                  }}
+                  onChange={setCoolDownAtNight}
                 />
               </View>
 
@@ -217,20 +207,14 @@ export default function HomeScreen() {
             {/* RATION LEVEL */}
             <RationLevel
               value={rationLevel}
-              onChange={async (level) => {
-                setRationLevelState(level);
-                await SetRationLevel(level);
-              }}
+              onChange={setRationLevelState}
             />
 
             {/* SCAVENGE + NEXT DAY */}
             <View style={styles.bottomRightColumn}>
               <ScavengeToggle
                 value={scavengeAtNight}
-                onChange={async (enabled) => {
-                  setScavengeAtNightState(enabled);
-                  await SetScavengeAtNight(enabled);
-                }}
+                onChange={setScavengeAtNightState}
               />
               <NextDay onPress={handleNextDay} />
             </View>

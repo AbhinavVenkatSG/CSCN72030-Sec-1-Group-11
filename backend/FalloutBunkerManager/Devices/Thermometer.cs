@@ -21,10 +21,13 @@ public class Thermometer : IDevice
     // Methods
     public DeviceStatus QueryLatest()
     {
+        // 1) Pull the next temperature reading from file.
         float readInValue = fileManager.GetNextValue();
 
-        // do math
+        // 2) Store the reading for other device calculations.
+        bunkerStatuses.Temperature = readInValue;
 
+        // 3) Return the latest temperature snapshot.
         return new DeviceStatus
         {
             type = DeviceType.Thermometer,

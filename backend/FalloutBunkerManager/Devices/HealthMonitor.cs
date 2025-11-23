@@ -25,43 +25,65 @@ public class HealthMonitor : IDevice
     // Methods
     public DeviceStatus QueryLatest()
     {
-        float readInValue = fileManager.GetNextValue();
+        // 1) Read the base daily delta from the emulation file.
+        float dailyValue = fileManager.GetNextValue();
 
-        if (bunkerStatuses.isScavenging == true)
+        // 2) Scavenging hurts: subtract radiation-weighted penalty from the daily delta.
+        if (bunkerStatuses.IsScavenging == true)
         {
-            currentHealth *= 0.8f;  // health goes down by 20%
-            // scanvenging on now we check the radiation level
-            if (bunkerStatuses.raditaionLevel > 20 && bunkerStatuses.raditaionLevel < 60)
-            {
-                currentHealth *= 0.8f; // additional 20% decrease
-            }
-            else if (bunkerStatuses.raditaionLevel >= 60)
-            {
-                currentHealth *= 05f; // additional 50% decrease
-            }
+            dailyValue -= bunkerStatuses.RadiationLevel * 0.5f;
         }
 
-        if (bunkerStatuses.rationStatus > 2)
+        // 3) Heat stroke if it is hot and we are not cooling down.
+        if (bunkerStatuses.Temperature >= 35 && bunkerStatuses.CoolDownAtNight == false)
         {
-            currentHealth *= 0.8f;
+            dailyValue -= 20f;
         }
 
-        if (bunkerStatuses.rationStatus < 2)
+        // 4) Suffocation damage when oxygen is gone.
+        if (bunkerStatuses.OxygenLevel == 0)
         {
-            currentHealth *= 0.8f;
+            dailyValue -= 10f;
         }
 
-        if (bunkerStatuses.lightsOn == false)
+        // 5) Dehydration damage at zero water.
+        if (bunkerStatuses.WaterLevel == 0)
         {
-            currentHealth *= 0.8f;
+            dailyValue -= 5f;
         }
-      
-        currentHealth += readInValue;
 
-        // Ensures health stays within bounds
+        // 6) Starvation damage at zero food (also skip ration bonus).
+        var foodDepleted = bunkerStatuses.FoodLevel == 0;
+        if (foodDepleted)
+        {
+            dailyValue -= 5f;
+        }
+
+        // 7) Morale bump from rations if food exists.
+        if (foodDepleted == false)
+        {
+            if (bunkerStatuses.RationStatus == 1) dailyValue += 5f;
+            else if (bunkerStatuses.RationStatus == 2) dailyValue += 10f;
+            else if (bunkerStatuses.RationStatus == 3) dailyValue += 15f;
+        }
+
+        // 8) Lights off doubles the daily swing.
+        if (bunkerStatuses.LightsOn == false)
+        {
+            dailyValue *= 2f;
+        }
+
+        // 9) Apply the adjusted delta to the running health.
+        currentHealth += dailyValue;
+
+        // 10) Clamp health between 0-100 to avoid impossible values.
         if (currentHealth > MAX_HEALTH) currentHealth = MAX_HEALTH;
         if (currentHealth < MIN_HEALTH) currentHealth = MIN_HEALTH;
 
+        // 11) Persist for other devices that might need health.
+        bunkerStatuses.HealthLevel = currentHealth;
+
+        // 12) Report the updated health level.
         return new DeviceStatus
         {
             type = DeviceType.HealthMonitor,

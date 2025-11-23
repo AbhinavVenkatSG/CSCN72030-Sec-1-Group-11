@@ -2,15 +2,17 @@ import React from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
 export type LightSwitchProps = {
-  value: number; // 0–100
+  value: number; // 0-100
   onChange: (newValue: number) => void;
   onApply?: () => void; // called when user finishes editing (blur or tap)
+  lightsOn?: boolean;
 };
 
 export default function LightSwitch({
   value,
   onChange,
   onApply,
+  lightsOn = false,
 }: LightSwitchProps) {
   const handleChangeText = (text: string) => {
     const cleaned = text.replace(/[^0-9]/g, "");
@@ -19,6 +21,9 @@ export default function LightSwitch({
     onChange(clamped);
   };
 
+  // Emoji style flips between lit (emoji) and text-style unlit bulb.
+  const bulbSymbol = lightsOn ? "💡" : "💡︎";
+
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Light Threshold</Text>
@@ -26,7 +31,9 @@ export default function LightSwitch({
       {/* tap anywhere on the box OR blur input to apply */}
       <Pressable>
         <View style={styles.box}>
-          <Text style={styles.symbol}>💡</Text>
+          <Text style={[styles.symbol, !lightsOn && styles.symbolOff]}>
+            {bulbSymbol}
+          </Text>
 
           <TextInput
             style={styles.input}
@@ -60,6 +67,9 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 32,
     marginRight: 6,
+  },
+  symbolOff: {
+    color: "#888",
   },
   input: {
     color: "#fff",

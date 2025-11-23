@@ -1,48 +1,41 @@
 // bunkerActions.ts
-// Central place for all "write" actions from the UI.
-// For now these just log and return; later you can swap in real API calls.
+// Central place for all backend mutations triggered from the UI.
 
 import type { RationLevelValue } from "@/components/RationLevel/RationLevel";
 
-const DEVICE_API_URL = "http://localhost:5244/api/device";
+const API_BASE_URL = "http://localhost:5244/api";
+const BUNKER_STATUS_API_URL = `${API_BASE_URL}/bunker-status`;
+const DEVICE_API_URL = `${API_BASE_URL}/device`;
 
 export type DeviceStatus = {
   type: number;
   currentValue: number;
 };
 
-export async function SetRationLevel(level: RationLevelValue): Promise<RationLevelValue> {
-  console.log("SetRationLevel called with:", level);
-  // TODO: replace with API call later
-  return level;
+async function postJson<TResponse>(url: string, payload: unknown): Promise<TResponse> {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || `Request failed (${response.status})`);
+  }
+
+  return (await response.json()) as TResponse;
 }
 
-export async function SetScrubberThreshold(percent: number): Promise<number> {
-  console.log("SetScrubberThreshold called with:", percent);
-  // TODO: replace with API call later
-  return percent;
-}
+async function getDeviceStatuses(): Promise<DeviceStatus[]> {
+  const response = await fetch(DEVICE_API_URL);
 
-export async function SetLightThreshold(percent: number): Promise<number> {
-  console.log("SetLightThreshold called with:", percent);
-  // TODO: replace with API call later
-  return percent;
-}
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || `Request failed (${response.status})`);
+  }
 
-export async function SetScavengeAtNight(
-  enabled: boolean
-): Promise<boolean> {
-  console.log("SetScavengeAtNight called with:", enabled);
-  // TODO: replace with API call later
-  return enabled;
-}
-
-export async function SetCoolDownAtNight(
-  enabled: boolean
-): Promise<boolean> {
-  console.log("SetCoolDownAtNight called with:", enabled);
-  // TODO: replace with API call later
-  return enabled;
+  return (await response.json()) as DeviceStatus[];
 }
 
 export type NextDayPayload = {
@@ -56,18 +49,9 @@ export type NextDayPayload = {
 export async function SetNextDay(
   payload: NextDayPayload
 ): Promise<DeviceStatus[]> {
-  console.log("SetNextDay called with:", payload);
+  // First apply the user's staged settings to BunkerStatuses.
+  await postJson<void>(`${BUNKER_STATUS_API_URL}/next-day`, payload);
 
-  try {
-    const response = await fetch(DEVICE_API_URL);
-    if (!response.ok) {
-      throw new Error("Failed to fetch device data");
-    }
-
-    const devices: DeviceStatus[] = await response.json();
-    return devices;
-  } catch (error) {
-    console.error("Error advancing to next day:", error);
-    throw error;
-  }
+  // Then trigger the daily device cycle to return the latest readings.
+  return getDeviceStatuses();
 }

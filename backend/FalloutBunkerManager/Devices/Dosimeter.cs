@@ -23,8 +23,13 @@ public class Dosimeter : IDevice
     // Methods
     public DeviceStatus QueryLatest()
     {
+        // 1) Read today's radiation level straight from the dataset.
         float readInValue = fileManager.GetNextValue();
-  
+
+        // 2) Persist the reading so other devices can react to radiation.
+        bunkerStatuses.RadiationLevel = readInValue;
+
+        // 3) Report the latest reading for the API response.
         return new DeviceStatus
         { 
             type = DeviceType.Dosimeter,

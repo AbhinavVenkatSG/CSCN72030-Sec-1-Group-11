@@ -25,28 +25,30 @@ public class FoodSensor : IDevice
     // Methods
     public DeviceStatus QueryLatest()
     {
+        // 1) Read the base daily delta from the emulation file.
         float readInValue = fileManager.GetNextValue();
 
-        if (bunkerStatuses.isScavenging == true)
+        // 2) Scale usage based on ration status (1=low, 2=mid, 3=high).
+        if (bunkerStatuses.RationStatus == 1) readInValue *= 0.5f;
+        if (bunkerStatuses.RationStatus == 3) readInValue *= 1.5f;
+
+        // 3) Scavenging adds a random food windfall (15-40).
+        if (bunkerStatuses.IsScavenging == true)
         {
-            currentFoodLevel *= 1.2f;
+            readInValue += Random.Shared.Next(15, 41);
         }
 
-        if (bunkerStatuses.rationStatus > 2)
-        {
-            readInValue *= 2;
-        }
-
-        if (bunkerStatuses.rationStatus < 2)
-        {
-            readInValue  /= 2;
-        }
-
+        // 4) Apply the adjusted delta to the running food level.
         currentFoodLevel += readInValue;
 
+        // 5) Clamp food between 0-100 to avoid impossible values.
         if (currentFoodLevel > MAX_FOOD) currentFoodLevel = MAX_FOOD;
         if (currentFoodLevel < MIN_FOOD) currentFoodLevel = MIN_FOOD;
 
+        // 6) Persist for other devices that care about food state.
+        bunkerStatuses.FoodLevel = currentFoodLevel;
+
+        // 7) Report the updated food level.
         return new DeviceStatus
         {
             type = DeviceType.FoodSensor,

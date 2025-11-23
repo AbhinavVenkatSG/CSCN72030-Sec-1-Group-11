@@ -26,19 +26,32 @@ public class WaterSensor : IDevice
     // Methods
     public DeviceStatus QueryLatest()
     {
+        // 1) Read the base daily delta from the emulation file.
         float readInValue = fileManager.GetNextValue();
 
-        if (bunkerStatuses.isScavenging == true)
+        // 2) Scavenging can return extra water (random 15-40).
+        if (bunkerStatuses.IsScavenging == true)
         {
-            currentWaterLevel *= 1.2f;
+            readInValue += Random.Shared.Next(15, 41);
         }
 
+        // 3) Cooling the bunker at night consumes extra water.
+        if (bunkerStatuses.CoolDownAtNight == true)
+        {
+            readInValue -= 15f;
+        }
+
+        // 4) Apply the adjusted delta to the running water level.
         currentWaterLevel += readInValue;
 
-        // Ensures water level stays within bounds
+        // 5) Clamp water between 0-100 to avoid impossible values.
         if (currentWaterLevel > MAX_WATER) currentWaterLevel = MAX_WATER;
         if (currentWaterLevel < MIN_WATER) currentWaterLevel = MIN_WATER;
 
+        // 6) Persist for other devices that depend on water state.
+        bunkerStatuses.WaterLevel = currentWaterLevel;
+
+        // 7) Report the updated water level.
         return new DeviceStatus
         { 
             type = DeviceType.WaterSensor,
