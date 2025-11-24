@@ -6,6 +6,27 @@ import type { RationLevelValue } from "@/components/RationLevel/RationLevel";
 const API_BASE_URL = "http://localhost:5244/api";
 const BUNKER_STATUS_API_URL = `${API_BASE_URL}/bunker-status`;
 const DEVICE_API_URL = `${API_BASE_URL}/device`;
+const REQUEST_TIMEOUT_MS = 1000;
+
+async function fetchWithTimeout(
+  url: string,
+  options: RequestInit = {},
+  timeoutMs: number = REQUEST_TIMEOUT_MS
+): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } catch (err) {
+    if ((err as Error).name === "AbortError") {
+      throw new Error("Request timed out while contacting the server.");
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
 
 export type DeviceStatus = {
   type: number;
@@ -13,7 +34,7 @@ export type DeviceStatus = {
 };
 
 async function postJson<TResponse>(url: string, payload: unknown): Promise<TResponse> {
-  const response = await fetch(url, {
+  const response = await fetchWithTimeout(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -28,7 +49,7 @@ async function postJson<TResponse>(url: string, payload: unknown): Promise<TResp
 }
 
 async function getDeviceStatuses(): Promise<DeviceStatus[]> {
-  const response = await fetch(DEVICE_API_URL);
+  const response = await fetchWithTimeout(DEVICE_API_URL);
 
   if (!response.ok) {
     const errorText = await response.text();
