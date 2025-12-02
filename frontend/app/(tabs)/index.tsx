@@ -3,6 +3,7 @@ import NextDay from "@/components/NextDay/NextDay";
 import RationLevel, {
   RationLevelValue,
 } from "@/components/RationLevel/RationLevel";
+import Toast from "@/components/Toast/Toast";
 import React, { useEffect, useState } from "react";
 import { Alert, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import CoolDown from "../../components/CoolDown/CoolDown";
@@ -25,6 +26,7 @@ import {
 
 const BASE_WIDTH = 1024;
 const BASE_HEIGHT = 768;
+const TOAST_DURATION_MS = 4000;
 
 const INITIAL_NEXT_DAY_SETTINGS: NextDayPayload = {
   powerPercent: 50,
@@ -49,6 +51,7 @@ export default function HomeScreen() {
   const scale = Math.min(width / BASE_WIDTH, height / BASE_HEIGHT);
 
   const [devices, setDevices] = useState<DeviceStatus[]>([]);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const [powerPercent, setPowerPercent] = useState(
     INITIAL_NEXT_DAY_SETTINGS.powerPercent
@@ -80,6 +83,13 @@ export default function HomeScreen() {
 
   // Two-state background tied to lights on/off.
   const backgroundColor = lightsOn ? "#3a3a6a" : "#050509";
+
+  useEffect(() => {
+    if (!toastMessage) return;
+
+    const timer = setTimeout(() => setToastMessage(null), TOAST_DURATION_MS);
+    return () => clearTimeout(timer);
+  }, [toastMessage]);
 
   useEffect(() => {
     const loadInitialDevices = async () => {
@@ -222,6 +232,7 @@ export default function HomeScreen() {
           </View>
         </View>
       </View>
+      {toastMessage && <Toast message={toastMessage} />}
     </View>
   );
 }
