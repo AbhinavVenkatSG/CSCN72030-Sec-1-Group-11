@@ -4,6 +4,7 @@ import RationLevel, {
   RationLevelValue,
 } from "@/components/RationLevel/RationLevel";
 import Toast from "@/components/Toast/Toast";
+import Tooltip from "@/components/Tooltip/Tooltip";
 import React, { useEffect, useState } from "react";
 import { Alert, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import CoolDown from "../../components/CoolDown/CoolDown";
@@ -45,6 +46,35 @@ enum DeviceType {
   HealthMonitorType = 5,
   DosimeterType = 6,
 }
+
+const TOOLTIP_TEXT = {
+  health:
+    "Tracks overall bunker wellbeing.\nDrops faster when lights are off or key resources run out.",
+  foodMonitor:
+    "Shows how much food remains in storage.\nFood drains each day in exchange for health. You take damage if food lvl = 0.\nRation level changes how fast it's used (?? ration = ?? usage = ?? healing).\nScavenging can bring in extra food.",
+  waterLevel:
+    "Shows drinking water remaining.\nWater drains daily, damage if water lvl = 0.\nCooling the bunker uses extra water.\nScavenging can bring in extra water.",
+  lightThreshold:
+    "Controls when the lights shut off to save gas.\nIf gas falls below this %, the lights turn off automatically.\nLights being off = all damage is doubled.",
+  generator:
+    "Shows remaining gasoline for power.\nGas drains each day.\nHigher O2 scrubber power uses more gas.\nLights off = slower gas use.\nScavenging can add extra gas.",
+  o2Scrubber:
+    "Shows current oxygen level.\nOxygen drains each day, big damage if o2 lvl = 0.\nOxygen changes daily based on scrubber power.\nHigher power = better oxygen but more fuel use.",
+  scrubberPower:
+    "Controls how hard the O2 scrubber runs.\n?? Power = ?? oxygen gain but ?? gas usage.\n?? Power = slower oxygen recovery, less fuel used.",
+  exteriorTemperature:
+    "Shows outdoor temperature.\nTemp 35 or above will harm wellbeing unless cooling is enabled.",
+  coolDown:
+    "Uses extra water to cool the bunker at night.\nPrevents heat damage if temps are high.",
+  radiationLevel:
+    "Shows outside radiation.\nHigher radiation makes scavenging damage wellbeing more.",
+  rationLevel:
+    "Controls how much food is consumed daily.\nLow = slow food use, low well-being gain.\nMid = normal food use, normal gain.\nHigh = fast food use, high gain.",
+  scavengeAtNight:
+    "Send a team to search for supplies.\nCan increase food, water, and gas.\nYou take damage relative to the current radiation level.",
+  nextDay:
+    "Advances one cycle.\nAll devices update in with their new daily values.",
+};
 
 export default function HomeScreen() {
   const { width, height } = useWindowDimensions();
@@ -135,7 +165,13 @@ export default function HomeScreen() {
         <View style={[styles.container, { backgroundColor }]}>
           {/* FULL-WIDTH HEALTH BAR */}
           <View style={styles.healthContainer} data-testid="health-value">
-            <HealthMonitor value={getValue(DeviceType.HealthMonitorType)} />
+            <Tooltip
+              text={TOOLTIP_TEXT.health}
+              style={styles.fullWidthTooltip}
+              placement="below"
+            >
+              <HealthMonitor value={getValue(DeviceType.HealthMonitorType)} />
+            </Tooltip>
           </View>
 
           {/* MAIN CONTENT ROW */}
@@ -145,21 +181,27 @@ export default function HomeScreen() {
               <View style={styles.resourceRow}>
                 {/* FOOD */}
                 <View style={styles.resourceModule} data-testid="food-value">
-                  <FoodMonitor value={foodValue} />
+                  <Tooltip text={TOOLTIP_TEXT.foodMonitor}>
+                    <FoodMonitor value={foodValue} />
+                  </Tooltip>
                 </View>
 
                 {/* WATER */}
                 <View style={styles.resourceModule} data-testid="water-value">
-                  <WaterSensor value={getValue(DeviceType.WaterSensor)} />
+                  <Tooltip text={TOOLTIP_TEXT.waterLevel}>
+                    <WaterSensor value={getValue(DeviceType.WaterSensor)} />
+                  </Tooltip>
                 </View>
 
                 {/* GENERATOR POWER CONTROL */}
                 <View style={styles.resourceModule}>
-                  <LightSwitch
-                    value={powerPercent}
-                    onChange={setPowerPercent}
-                    lightsOn={lightsOn}
-                  />
+                  <Tooltip text={TOOLTIP_TEXT.lightThreshold}>
+                    <LightSwitch
+                      value={powerPercent}
+                      onChange={setPowerPercent}
+                      lightsOn={lightsOn}
+                    />
+                  </Tooltip>
                 </View>
 
                 {/* GENERATOR */}
@@ -167,7 +209,9 @@ export default function HomeScreen() {
                   style={styles.resourceModule}
                   data-testid="generator-value"
                 >
-                  <Generator value={getValue(DeviceType.GeneratorType)} />
+                  <Tooltip text={TOOLTIP_TEXT.generator}>
+                    <Generator value={getValue(DeviceType.GeneratorType)} />
+                  </Tooltip>
                 </View>
 
                 {/* O2 SCRUBBER + THRESHOLD */}
@@ -175,11 +219,15 @@ export default function HomeScreen() {
                   style={styles.resourceModule}
                   data-testid="o2scrubber-value"
                 >
-                  <OxygenScrubber value={getValue(DeviceType.O2Scrubber)} />
-                  <OxygenScrubberThreshold
-                    value={o2Threshold}
-                    onChange={setO2ThresholdState}
-                  />
+                  <Tooltip text={TOOLTIP_TEXT.o2Scrubber}>
+                    <OxygenScrubber value={getValue(DeviceType.O2Scrubber)} />
+                  </Tooltip>
+                  <Tooltip text={TOOLTIP_TEXT.scrubberPower}>
+                    <OxygenScrubberThreshold
+                      value={o2Threshold}
+                      onChange={setO2ThresholdState}
+                    />
+                  </Tooltip>
                 </View>
               </View>
             </View>
@@ -196,19 +244,25 @@ export default function HomeScreen() {
                 ]}
                 data-testid="thermometer-value"
               >
-                <Thermometer value={thermometerValue} />
+                <Tooltip text={TOOLTIP_TEXT.exteriorTemperature}>
+                  <Thermometer value={thermometerValue} />
+                </Tooltip>
               </View>
 
               {/* COOL DOWN AT NIGHT TOGGLE NEAR TEMPERATURE */}
               <View style={styles.coolDownWrapper}>
-                <CoolDown
-                  value={coolDownAtNight}
-                  onChange={setCoolDownAtNight}
-                />
+                <Tooltip text={TOOLTIP_TEXT.coolDown}>
+                  <CoolDown
+                    value={coolDownAtNight}
+                    onChange={setCoolDownAtNight}
+                  />
+                </Tooltip>
               </View>
 
               <View style={styles.exteriorItem} data-testid="dosimeter-value">
-                <Dosimeter value={getValue(DeviceType.DosimeterType)} />
+                <Tooltip text={TOOLTIP_TEXT.radiationLevel}>
+                  <Dosimeter value={getValue(DeviceType.DosimeterType)} />
+                </Tooltip>
               </View>
             </View>
           </View>
@@ -216,18 +270,24 @@ export default function HomeScreen() {
           {/* BOTTOM BAR */}
           <View style={styles.bottomRow}>
             {/* RATION LEVEL */}
-            <RationLevel
-              value={rationLevel}
-              onChange={setRationLevelState}
-            />
+            <Tooltip text={TOOLTIP_TEXT.rationLevel}>
+              <RationLevel
+                value={rationLevel}
+                onChange={setRationLevelState}
+              />
+            </Tooltip>
 
             {/* SCAVENGE + NEXT DAY */}
             <View style={styles.bottomRightColumn}>
-              <ScavengeToggle
-                value={scavengeAtNight}
-                onChange={setScavengeAtNightState}
-              />
-              <NextDay onPress={handleNextDay} />
+              <Tooltip text={TOOLTIP_TEXT.scavengeAtNight}>
+                <ScavengeToggle
+                  value={scavengeAtNight}
+                  onChange={setScavengeAtNightState}
+                />
+              </Tooltip>
+              <Tooltip text={TOOLTIP_TEXT.nextDay}>
+                <NextDay onPress={handleNextDay} />
+              </Tooltip>
             </View>
           </View>
         </View>
@@ -257,7 +317,7 @@ const styles = StyleSheet.create({
   healthContainer: {
     width: "100%",
     alignSelf: "stretch",
-    alignItems: "center",
+    alignItems: "stretch",
     marginTop: 8,
     marginBottom: 16,
   },
@@ -319,5 +379,11 @@ const styles = StyleSheet.create({
   bottomRightColumn: {
     alignItems: "flex-end",
     gap: 8,
+  },
+  fullWidthTooltip: {
+    width: "100%",
+    alignSelf: "stretch",
+    alignItems: "stretch",
+    flex: 1,
   },
 });
