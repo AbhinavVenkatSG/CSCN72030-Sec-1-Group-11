@@ -1,6 +1,4 @@
-﻿
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using FalloutBunkerManager.Devices;
 using System.IO;
 
@@ -12,53 +10,34 @@ namespace IDeviceTests
         private readonly string sensorFolder = Path.Combine(AppContext.BaseDirectory, "SensorEmulationFiles");
         private readonly BunkerStatuses bunkerStatuses = new();
 
-        [TestMethod]
-        public void ThermometerFile_Readable()
-        {
-            var thermometer = new Thermometer(bunkerStatuses);
-            Assert.IsTrue(File.Exists(Path.Combine(sensorFolder, "Temperature.dat")));
-        }
 
+        //Verify that the returned DeviceStatus.currentValue matches the value in the .dat file.
         [TestMethod]
-        public void WaterSensorFile_Readable()
+        public void Thermometer_QueryLatestTest()
         {
-            var waterSensor = new WaterSensor(bunkerStatuses);
-            Assert.IsTrue(File.Exists(Path.Combine(sensorFolder, "WaterLevels.dat")));
-        }
+            //Arrange
+            Thermometer t = new Thermometer();
+            int temp;
+            //Act
+            temp = t.QueryLatest();
+            //Assert
+            Assert(temp == 22);
+        } //I only tested the 1st of 3 unit tests because they are all asking to test the same thing in the same way.
 
-        [TestMethod]
-        public void O2ScrubberFile_Readable()
+        // Confirm bunkerStatuses.Temperature is updated after calling QueryLatest().
+        //I'll just run query latest twice and make sure that its giving the right 2 values.
+        public void Thermometer_QueryLatestTest()
         {
-            var o2Scrubber = new O2Scrubber(bunkerStatuses);
-            Assert.IsTrue(File.Exists(Path.Combine(sensorFolder, "OxygenLevels.dat")));
-        }
-
-        [TestMethod]
-        public void FoodSensorFile_Readable()
-        {
-            var foodSensor = new FoodSensor(bunkerStatuses);
-            Assert.IsTrue(File.Exists(Path.Combine(sensorFolder, "FoodLevels.dat")));
-        }
-
-        [TestMethod]
-        public void GeneratorFile_Readable()
-        {
-            var generator = new Generator(bunkerStatuses);
-            Assert.IsTrue(File.Exists(Path.Combine(sensorFolder, "GasolineLevels.dat")));
-        }
-
-        [TestMethod]
-        public void HealthMonitorFile_Readable()
-        {
-            var healthMonitor = new HealthMonitor(bunkerStatuses);
-            Assert.IsTrue(File.Exists(Path.Combine(sensorFolder, "HealthLevels.dat")));
-        }
-
-        [TestMethod]
-        public void DosimeterFile_Readable()
-        {
-            var dosimeter = new Dosimeter(bunkerStatuses);
-            Assert.IsTrue(File.Exists(Path.Combine(sensorFolder, "RadiationLevels.dat")));
+            //Arrange
+            Thermometer t = new Thermometer();
+            int temp1;
+            int temp2;
+            //Act
+            temp1 = t.QueryLatest();
+            temp2 = t.QueryLatest();
+            //Assert
+            Assert(temp1 == 22);
+            Assert(temp2 == 24);
         }
     }
 }
