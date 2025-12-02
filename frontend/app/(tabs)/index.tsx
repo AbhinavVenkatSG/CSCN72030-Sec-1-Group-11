@@ -4,7 +4,7 @@ import RationLevel, {
   RationLevelValue,
 } from "@/components/RationLevel/RationLevel";
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import { Alert, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import CoolDown from "../../components/CoolDown/CoolDown";
 import Dosimeter from "../../components/Dosimeter/Dosimeter";
 import FoodMonitor from "../../components/FoodMonitor/FoodMonitor";
@@ -110,6 +110,7 @@ export default function HomeScreen() {
       setCoolDownAtNight(false);
     } catch (err) {
       console.error("Error advancing to next day:", err);
+      Alert.alert("Couldn't query devices!");
     }
   };
 
