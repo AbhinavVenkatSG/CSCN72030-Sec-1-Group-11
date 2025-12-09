@@ -5,7 +5,7 @@ using System; // Required for GC
 
 namespace FalloutBunkerManager.Tests.Backend.IDeviceTests
 {
-    [TestClass]
+    [TestClass]//test
     public class GeneratorTests
     {
         private const string TestDirectory = "SensorEmulationFiles";
