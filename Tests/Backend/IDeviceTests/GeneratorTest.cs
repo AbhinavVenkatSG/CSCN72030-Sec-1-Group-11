@@ -26,7 +26,7 @@ namespace FalloutBunkerManager.Tests.Backend.IDeviceTests
         }
 
         [TestCleanup]
-        public void Cleanup()
+        public void Cleanup()//test
         {
             GC.Collect();
             GC.WaitForPendingFinalizers();
