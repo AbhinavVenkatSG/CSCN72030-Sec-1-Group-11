@@ -100,7 +100,6 @@ namespace FalloutBunkerManager.Tests.Backend.ControllerTests
         public void System_TurnOffLights_AffectsGeneratorReading()
         {
             // 1. CRITICAL: KILL THE SETUP INSTANCE FIRST
-            // The Setup() method already opened the files. We cannot overwrite them until we close those locks.
             _deviceNetwork = null!;
             _queryController = null!;
             _commandController = null!;

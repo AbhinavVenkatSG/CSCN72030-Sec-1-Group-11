@@ -2,7 +2,6 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Bunker Device Displays', () => {
   test.beforeEach(async ({ page }) => {
-    // Update port if needed
     await page.goto('http://localhost:8081');
   });
 
@@ -17,8 +16,6 @@ test.describe('Bunker Device Displays', () => {
   test('Dosimeter should be visible', async ({ page }) => {
     const dosi = page.getByTestId('dosimeter-value');
     await expect(dosi).toBeVisible();
-    // Assuming dosimeter shows "Rad" or similar unit
-    // await expect(dosi).toContainText('Rad'); 
   });
 
   // User Story 3: Food Sensor

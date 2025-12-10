@@ -10,15 +10,11 @@ test.describe('Bunker Controls', () => {
     const lowBtn = page.getByText('Low', { exact: true });
     await expect(lowBtn).toBeVisible();
     await lowBtn.click();
-    // In a real app, you might verify style change here
   });
 
   // User Story 9: Generator Load Threshold (Light Switch)
   test('User can adjust Light Threshold', async ({ page }) => {
-    // Assuming LightSwitch has accessible text or input
     const control = page.getByText('Light Threshold', { exact: false }).first();
-    // Or if it uses a slider:
-    // const slider = page.getByRole('slider').first();
     await expect(control).toBeVisible();
   });
 
