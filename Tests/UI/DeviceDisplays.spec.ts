@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Bunker Device Displays', () => {
+test.describe('Bunker Device Displays', () => { //123
   test.beforeEach(async ({ page }) => {
     await page.goto('http://localhost:8081');
   });
