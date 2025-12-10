@@ -50,6 +50,7 @@ public class BunkerStatusController : ControllerBase
         return Ok(new { bunkerStatuses.CoolDownAtNight });
     }
 
+    // GET /api/bunker-status/next-day
     [HttpPost("next-day")]
     public IActionResult SetNextDay([FromBody] NextDayRequest request)
     {

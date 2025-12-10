@@ -33,7 +33,6 @@ export type DeviceStatus = {
   currentValue: number;
 };
 
-
 async function postJson<TResponse>(url: string, payload: unknown): Promise<TResponse> {
   const response = await fetchWithTimeout(url, {
     method: "POST",
