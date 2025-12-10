@@ -1,60 +1,78 @@
-name: Sprint-1-tests
+name: Fallout Bunker CI Pipeline
 
 on:
   workflow_dispatch:      
   push:
     branches: [ main ]    
+  pull_request:
+    branches: [ main ]
+
 jobs:
-  scada-pipeline:
+  full-stack-test:
     runs-on: ubuntu-latest
 
     steps:
-  
+    # --- 1. SETUP ---
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
-    
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x'
-
-
-    - name: Restore Test Project
-      run: dotnet restore ./Tests/Backend/IDeviceTests/IDeviceTests.csproj
-
-    - name: Build Test Project
-      run: dotnet build ./Tests/Backend/IDeviceTests/IDeviceTests.csproj --configuration Release
-
-    - name: Run MSTest Unit Tests (Level 1)
-      run: dotnet test ./Tests/Backend/IDeviceTests/IDeviceTests.csproj --configuration Release --no-build
-
-
-    - name: Restore API Project
-      run: dotnet restore ./backend/FalloutBunkerApi/FalloutBunkerApi.csproj
-
-    - name: Build API Project
-      run: dotnet build ./backend/FalloutBunkerApi/FalloutBunkerApi.csproj --configuration Release
-
-    - name: Start API in background (Level 2)
-      run: |
-        echo "Starting ASP.NET Core API..."
-        dotnet run --project ./backend/FalloutBunkerApi/FalloutBunkerApi.csproj &
-        sleep 10   # give API time to start
-
+        dotnet-version: '9.0.x'
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '20'
 
-    - name: Install Node Dependencies
+    # --- 2. BACKEND UNIT & INTEGRATION TESTS (MSTest) ---
+    - name: Restore Backend Tests
+      run: dotnet restore ./Tests/Backend/IDeviceTests/IDeviceTests.csproj
+
+    - name: Run Backend MSTest
+      # Runs logic tests in memory. Does NOT need the API running.
+      run: dotnet test ./Tests/Backend/IDeviceTests/IDeviceTests.csproj --configuration Release -- -parallel:none
+
+    # --- 3. PREPARE & START API ---
+    
+    # [NEW STEP] Clean up any files left over by MSTest so API starts fresh
+    - name: Clean Sensor Data
+      run: rm -rf ./backend/FalloutBunkerManager/SensorEmulationFiles
+
+    - name: Start Backend API (Background)
+      run: |
+        echo "Starting .NET API..."
+        # Start API in background on port 5000
+        nohup dotnet run --project ./backend/FalloutBunkerManager/FalloutBunkerManager.csproj --urls "http://localhost:5000" > api.log 2>&1 &
+        sleep 10 # Give it time to boot up and create default files
+        cat api.log
+
+    # --- 4. START FRONTEND ---
+    - name: Install Frontend Dependencies
       run: npm install
-      working-directory: ./Tests/Backend
+      working-directory: ./frontend
 
-    - name: Run Level 2 Device API Tests
-      run: node poll-devices.mjs
-      working-directory: ./Tests/Backend
+    - name: Start Frontend Web (Background)
+      run: |
+        echo "Starting Expo Web..."
+        cd frontend
+        # Start web server on port 8081
+        nohup npx expo start --web --port 8081 > frontend.log 2>&1 &
+        sleep 15
+        cat frontend.log
 
-    - name: Run Level 3 Playwright UI Tests (placeholder)
-      run: echo "Playwright tests will be added in Sprint 2"
+    # --- 5. PLAYWRIGHT UI SYSTEM TESTS ---
+    - name: Install Playwright Dependencies
+      working-directory: ./Tests/UI
+      run: npm install
+
+    - name: Install Playwright Browsers
+      working-directory: ./Tests/UI
+      run: npx playwright install --with-deps
+
+    - name: Run Playwright System Tests
+      working-directory: ./Tests/UI
+      run: npx playwright test
+      env:
+        CI: true
