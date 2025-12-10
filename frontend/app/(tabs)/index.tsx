@@ -134,7 +134,8 @@ export default function HomeScreen() {
       >
         <View style={[styles.container, { backgroundColor }]}>
           {/* FULL-WIDTH HEALTH BAR */}
-          <View style={styles.healthContainer} data-testid="health-value">
+          {/* UPDATED: Uses testID for Playwright compatibility */}
+          <View style={styles.healthContainer} testID="health-value">
             <HealthMonitor value={getValue(DeviceType.HealthMonitorType)} />
           </View>
 
@@ -144,12 +145,12 @@ export default function HomeScreen() {
             <View style={styles.leftColumn}>
               <View style={styles.resourceRow}>
                 {/* FOOD */}
-                <View style={styles.resourceModule} data-testid="food-value">
+                <View style={styles.resourceModule} testID="food-value">
                   <FoodMonitor value={foodValue} />
                 </View>
 
                 {/* WATER */}
-                <View style={styles.resourceModule} data-testid="water-value">
+                <View style={styles.resourceModule} testID="water-value">
                   <WaterSensor value={getValue(DeviceType.WaterSensor)} />
                 </View>
 
@@ -165,7 +166,7 @@ export default function HomeScreen() {
                 {/* GENERATOR */}
                 <View
                   style={styles.resourceModule}
-                  data-testid="generator-value"
+                  testID="generator-value"
                 >
                   <Generator value={getValue(DeviceType.GeneratorType)} />
                 </View>
@@ -173,7 +174,7 @@ export default function HomeScreen() {
                 {/* O2 SCRUBBER + THRESHOLD */}
                 <View
                   style={styles.resourceModule}
-                  data-testid="o2scrubber-value"
+                  testID="o2scrubber-value"
                 >
                   <OxygenScrubber value={getValue(DeviceType.O2Scrubber)} />
                   <OxygenScrubberThreshold
@@ -188,18 +189,18 @@ export default function HomeScreen() {
             <View style={styles.exteriorBox}>
               <Text style={styles.exteriorTitle}>Exterior Values</Text>
 
-              {/* THERMOMETER WITH HOT BACKGROUND WHEN > 35 */}
+              {/* THERMOMETER */}
               <View
                 style={[
                   styles.exteriorItem,
                   thermometerValue >= 35 && styles.exteriorItemHot,
                 ]}
-                data-testid="thermometer-value"
+                testID="thermometer-value"
               >
                 <Thermometer value={thermometerValue} />
               </View>
 
-              {/* COOL DOWN AT NIGHT TOGGLE NEAR TEMPERATURE */}
+              {/* COOL DOWN AT NIGHT TOGGLE */}
               <View style={styles.coolDownWrapper}>
                 <CoolDown
                   value={coolDownAtNight}
@@ -207,7 +208,8 @@ export default function HomeScreen() {
                 />
               </View>
 
-              <View style={styles.exteriorItem} data-testid="dosimeter-value">
+              {/* DOSIMETER */}
+              <View style={styles.exteriorItem} testID="dosimeter-value">
                 <Dosimeter value={getValue(DeviceType.DosimeterType)} />
               </View>
             </View>
