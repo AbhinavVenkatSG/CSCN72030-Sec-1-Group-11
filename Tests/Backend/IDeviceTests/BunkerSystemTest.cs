@@ -12,7 +12,7 @@ namespace FalloutBunkerManager.Tests.Backend.ControllerTests
     [TestClass]
     public class BunkerSystemTests
     {
-        private const string TestDirectory = "SensorEmulationFiles";
+        private const string TestDirectory = "SensorEmulationFiles";//test
         
         // System Components
         private BunkerStatuses _globalState = null!;
